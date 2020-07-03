@@ -1,0 +1,27 @@
+{
+  "name": "dark",
+  "version": "1.0.0",
+  "description": "chatbot engine",
+  "main": "main.ts",
+  "scripts": {
+    "start": "ts-node --files ./main.ts",
+    "test": "ts-node --files ./examples/simple-root.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arnaldobadin/dark.git"
+  },
+  "author": "Arnaldo Badin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arnaldobadin/dark/issues"
+  },
+  "homepage": "https://github.com/arnaldobadin/dark#readme",
+  "dependencies": {
+    "@types/node": "^14.0.14",
+    "@types/uuid": "^8.0.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.6",
+    "uuid": "^8.2.0"
+  }
+}
