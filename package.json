@@ -1,0 +1,31 @@
+{
+  "name": "bard-builder",
+  "version": "1.0.0",
+  "description": "chatbot builder framework",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node ./dist/main.js",
+    "test": "npm run build && node ./dist/examples/simple-root.js",
+    "postinstall": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arnaldobadin/bard"
+  },
+  "author": "Arnaldo Badin",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/arnaldobadin/bard/issues"
+  },
+  "homepage": "https://github.com/arnaldobadin/bard#readme",
+  "dependencies": {
+    "@types/node": "^14.0.14",
+    "@types/uuid": "^8.0.0",
+    "uuid": "^8.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.5"
+  }
+}
