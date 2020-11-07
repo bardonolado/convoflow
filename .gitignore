@@ -2,3 +2,4 @@ node_modules
 *.keys
 config/envs/**
 config/keys/**
+dist

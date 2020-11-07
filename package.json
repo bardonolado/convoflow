@@ -1,27 +1,31 @@
 {
-  "name": "dark",
+  "name": "@arnaldobadin/bard",
   "version": "1.0.0",
   "description": "chatbot engine",
-  "main": "main.ts",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
   "scripts": {
-    "start": "ts-node --files ./main.ts",
-    "test": "ts-node --files ./examples/simple-root.ts"
+    "build": "tsc",
+    "start": "npm run build && node ./dist/main.js",
+    "test": "npm run build && node ./dist/examples/simple-root.js",
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arnaldobadin/dark.git"
+    "url": "git+https://github.com/arnaldobadin/bard"
   },
   "author": "Arnaldo Badin",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/arnaldobadin/dark/issues"
+    "url": "https://github.com/arnaldobadin/bard/issues"
   },
-  "homepage": "https://github.com/arnaldobadin/dark#readme",
+  "homepage": "https://github.com/arnaldobadin/bard#readme",
   "dependencies": {
     "@types/node": "^14.0.14",
     "@types/uuid": "^8.0.0",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.9.6",
     "uuid": "^8.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.5"
   }
 }
