@@ -35,6 +35,11 @@ class Logger {
         return console.log(`[*] Info: ${message}`);
     }
 
+    public event(message: string) {
+        if (!this.status) return false;
+        return console.log(`[#] Event: ${message}`);
+    }
+
     public in(message: string) {
         if (!this.status) return false;
         return console.log(`[>] In: ${message}`);

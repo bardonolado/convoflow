@@ -3,7 +3,7 @@ import vow from "../utils/vow";
 
 export type OperationFunction = (...args: any[]) => Promise<any>;
 
-interface WorkerSettings {
+export interface WorkerSettings {
     delay?: number
 };
 

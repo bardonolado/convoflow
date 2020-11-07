@@ -1,4 +1,4 @@
-import {Bot, Events, Message} from "../main";
+import {Bot, Events, Message, MessageTypes} from "../main";
 
 const main = async function() {
 	const bot = new Bot({name: "simple-bot"});
@@ -22,7 +22,7 @@ const main = async function() {
 				session.storage.set("intent", null);
 				
 				const message = session.getMessage();
-				const data = message?.data;
+				const data = message.data;
 
 				/*
 					this block is only an example,
@@ -85,7 +85,7 @@ const main = async function() {
 
 				session.storage.set("known", true);
 
-				await session.send(greeting, Message.Types.TEXT);
+				await session.send(greeting, MessageTypes.TEXT);
 				/*
 					break course in order to wait for the next interation,
 					that will be handle by the next step
@@ -126,9 +126,9 @@ const main = async function() {
 	const session_token = "dk2#9jkd__392jd";
 	const origin = "test-file";
 
-	bot.push(new Message("my-contact", session_token, origin, "hello", Message.Types.TEXT));
-	bot.push(new Message("my-contact", session_token, origin, "good", Message.Types.TEXT));
-	bot.push(new Message("my-contact", session_token, origin, "hello again", Message.Types.TEXT));
+	bot.push(new Message("my-contact", session_token, origin, "hello", MessageTypes.TEXT));
+	bot.push(new Message("my-contact", session_token, origin, "good", MessageTypes.TEXT));
+	bot.push(new Message("my-contact", session_token, origin, "hello again", MessageTypes.TEXT));
 }
 
 main();

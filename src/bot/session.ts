@@ -1,11 +1,10 @@
-import {error} from "../utils/return";
-import Message, {Types as MessageTypes} from "../gateway/message";
+import Message, {MessageTypes, createEmptyMessage} from "../gateway/message";
 import Gateway from "../gateway/gateway";
 import {Mark} from "../flow/course";
-import Emitter, {Events as EmitterEvents} from "./emitter";
+import Emitter, {EmitterEvents} from "./emitter";
 
 export interface Progress {
-    node: string,
+    node: string
     step: number
 };
 
@@ -77,7 +76,7 @@ export default class Session {
     }
 
     public getMessage() {
-        return this.message;
+        return this.message || createEmptyMessage();
     }
 
     public getContact() {
@@ -120,7 +119,7 @@ export default class Session {
         return this.contact = value;
     }
 
-    public setMark(name: string, node: string, step: number): error {
+    public setMark(name: string, node: string, step: number): (Error | null) {
         if (!name.length) return new Error("Mark (name) must be a valid string");
         if (!node.length) return new Error("Node (name) must be a valid string");
         if (step < 0) return new Error("Step (node's step) must be a valid integer 0+");
@@ -136,7 +135,7 @@ export default class Session {
         return null;
     }
 
-    public setProgress(node: string, step: number = 0): error {
+    public setProgress(node: string, step: number = 0): (Error | null) {
         if (!node.length) return new Error("Node (name) must be a valid string");
         if (step < 0) return new Error("Step (node's step) must be a valid integer 0+");
 
@@ -149,7 +148,7 @@ export default class Session {
         return this.timestamp = Math.floor(+new Date() / 1000);
     }
 
-    public async send(data: string, type: MessageTypes = Message.Types.TEXT) {
+    public async send(data: string, type: MessageTypes = MessageTypes.TEXT) {
         if (!data.length) throw new Error("Data must be a valid string");
         if (!type.length) throw new Error("Type must be a valid string");
 

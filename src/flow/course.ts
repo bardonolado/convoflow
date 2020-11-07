@@ -1,5 +1,5 @@
 import Session from "../bot/session";
-import Flow, {Types as FlowTypes} from "./flow";
+import Flow, {FlowTypes} from "./flow";
 import Node from "./node";
 
 export type Mark = {
@@ -8,16 +8,13 @@ export type Mark = {
     step: number
 };
 
-enum CourseState {
+export enum CourseState {
     DEFAULT = "default",
     COMPLETED = "completed",
     OVERLOAD = "overload"
 };
 
-export {CourseState as State};
-
 export default class Course {
-    private static readonly State = CourseState;
     private static readonly MAX_STACK = 3;
 
     private flow: Flow;
@@ -45,19 +42,19 @@ export default class Course {
         this.lifes = 1;
         this.lock = false;
 
-        this.state = Course.State.DEFAULT;
+        this.state = CourseState.DEFAULT;
     }
 
     public async run() {
         let status = false;
     
-        if (this.state != Course.State.DEFAULT) return false;
+        if (this.state != CourseState.DEFAULT) return false;
         status = await this.middleware(FlowTypes.INCOMING);
 
-        if (status && (this.state as CourseState) != Course.State.OVERLOAD) return false;
+        if (status && (this.state as CourseState) != CourseState.OVERLOAD) return false;
         status = await this.trailing();
 
-        if ((this.state as CourseState) == Course.State.COMPLETED) return false;
+        if ((this.state as CourseState) == CourseState.COMPLETED) return false;
         status = await this.middleware(FlowTypes.OUTGOING);
 
         return true;
@@ -69,7 +66,7 @@ export default class Course {
         let stack = 0;
         while (stack < Course.MAX_STACK && this.current_step < this.current_node.chain.length && this.lifes > 0) {
             this.lock = false;
-            this.state = Course.State.DEFAULT;
+            this.state = CourseState.DEFAULT;
             
             await this.current_node.chain[this.current_step](this.session, this);
 
@@ -103,7 +100,7 @@ export default class Course {
 
             await this.call();
 
-            if (this.state != Course.State.OVERLOAD) break;
+            if (this.state != CourseState.OVERLOAD) break;
         }
 
         let match = false;
@@ -131,7 +128,7 @@ export default class Course {
         this.lock = true;
 
         if (this.current_step >= (this.current_node.chain.length - 1)) {
-            this.state = Course.State.OVERLOAD;
+            this.state = CourseState.OVERLOAD;
         }
 
         this.current_step++;
@@ -144,7 +141,7 @@ export default class Course {
         this.lock = true;
 
         if (this.current_step >= (this.current_node.chain.length - 1)) {
-            this.state = Course.State.OVERLOAD;
+            this.state = CourseState.OVERLOAD;
         }
 
         this.current_step++;
@@ -247,7 +244,7 @@ export default class Course {
         this.lock = true;
         
         this.lifes = 0;
-        this.state = Course.State.COMPLETED;
+        this.state = CourseState.COMPLETED;
 
         const nodes = this.flow.getNodes();
         if (nodes instanceof Error) return false;

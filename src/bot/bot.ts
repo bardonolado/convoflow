@@ -1,16 +1,15 @@
 import vow from "../utils/vow";
-import {error} from "../utils/return";
-import Flow, {Types as FlowTypes} from "../flow/flow";
+import Flow, {FlowTypes} from "../flow/flow";
 import {StepFunction} from "../flow/definition";
 import Gateway from "../gateway/gateway";
 import Session from "./session";
-import Message, {Types as MessageTypes} from "../gateway/message";
+import Message, {MessageTypes} from "../gateway/message";
 import Course from "../flow/course";
 import Worker from "./worker";
-import Emitter, {Events as EmitterEvents, ActionFunction} from "./emitter";
+import Emitter, {EmitterEvents, ActionFunction} from "./emitter";
 
 export {EmitterEvents as Events};
-export {Message};
+export {Message, MessageTypes};
 
 export interface BotSettings {
     name: string
@@ -81,17 +80,17 @@ export class Bot {
         return this.signature;
     }
 
-    public incoming(name: string, chain: StepFunction[]): error {
+    public incoming(name: string, chain: StepFunction[]) {
         if (this.status) throw new Error(`Can't insert node after startup`);
         return this.flow.insertNode(name, chain, FlowTypes.INCOMING);
     }
 
-    public trailing(name: string, chain: StepFunction[]): error {
+    public trailing(name: string, chain: StepFunction[]) {
         if (this.status) throw new Error(`Can't insert node after startup`);
         return this.flow.insertNode(name, chain, FlowTypes.TRAILING);
     }
 
-    public outgoing(name: string, chain: StepFunction[]): error {
+    public outgoing(name: string, chain: StepFunction[]) {
         if (this.status) throw new Error(`Can't insert node after startup`);
         return this.flow.insertNode(name, chain, FlowTypes.OUTGOING);
     }
@@ -101,7 +100,7 @@ export class Bot {
         return this.emitter.set(event, action);
     }
 
-    public push(message: Message): error {
+    public push(message: Message) {
         if (!this.status) throw new Error(`Can't insert event before startup`);
         return this.gateway.pushIncoming(message);
     }

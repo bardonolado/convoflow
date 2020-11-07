@@ -1,7 +1,6 @@
 import {v4 as uuid} from "uuid";
-import {error} from "../utils/return";
 
-enum MessageTypes {
+export enum MessageTypes {
     TEXT = "text",
     AUDIO = "audio",
     VOICE = "voice",
@@ -11,14 +10,23 @@ enum MessageTypes {
     DOCUMENT = "document",
     STICKER = "sticker",
     CONTACT = "contact",
-    LOCATION = "location"
+    LOCATION = "location",
+    NONE = "none"
 };
 
-export {MessageTypes as Types};
+export interface MessageStructure {
+    token: string
+    session: string
+    contact: string
+    origin: string
+    vendor?: string
+    data: string
+    type: MessageTypes
+    creation: Date
+    extra?: any
+};
 
-export default class Message {
-    public static readonly Types = MessageTypes;
-
+export default class Message implements MessageStructure {
     public token: string;
     public session: string;
     public contact: string;
@@ -36,10 +44,10 @@ export default class Message {
         this.origin = origin;
         this.data = data;
         this.type = type;
-        this.creation = creation || new Date();
+        this.creation = (creation || new Date());
     }
 
-    public validate(): error {
+    public validate(): (Error | null) {
         if (!this.token.length) return new Error("Invalid or missing token field");
         if (!this.session.length) return new Error("Invalid or missing session field");
         if (!this.contact.length) return new Error("Invalid or missing contact field");
@@ -48,4 +56,8 @@ export default class Message {
         if (!this.type.length) return new Error("Invalid or missing type field");
         return null;
     }
+}
+
+export function createEmptyMessage() {
+    return new Message("", "", "", "", MessageTypes.NONE);
 }
