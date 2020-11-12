@@ -170,6 +170,14 @@ bot.trailing("begin-dialog", [
 
 The above example show us how we can use the **outgoing layer** to save and retrieve data to manipulate the conversation flow. Every time an user interacts with the chatbot a message will be choose, if the user already interacted, it will send a `Nice to see you again!` message, otherwise a `Hello, nice to meet you!` one. To know if the user already interacted we can set a "known" flag at the end of any **trailing** interaction using `session.storage.set("known", true)`. When the user enters the **trailing** "begin-dialog", we can check if the flag "known" is set to true, than choose the respective message.
 
+There are others **course** functions that may be helpful:
+```typescript
+course.jump(2) /* jump to any step on the current dialog using its index */
+course.mark("this-point") /* mark a step on flow */
+course.hop("that-point") /* hop to a marked step on flow (above) */
+course.back() /* back to the last marked mark */
+```
+
 We have some examples on the `examples` folder of this source code.
 
 ##  Events
