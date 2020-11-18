@@ -1,0 +1,15 @@
+{
+  "name": "dice-roller",
+  "version": "1.0.0",
+  "description": "dice roller chatbot",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Arnaldo Badin",
+  "license": "GPLv3",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

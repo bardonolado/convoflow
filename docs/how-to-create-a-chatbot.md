@@ -14,6 +14,7 @@
     - [Sending a message](#sending-a-message)
 - [Putting it all together](#putting-it-all-together)
     - [Organizing Dialogs](#organizing-dialogs)
+- [Examples](#examples)
 - [Considerations](#considerations)
 
 ## About it
@@ -458,6 +459,14 @@ module.exports = function(deps) {
 ```
 
 This is a good way to structure your dialogs, it can be a huge mess, believe me. Now you can pass dependencies through dialogs now, it will be very useful later on.
+
+## Examples
+
+We have some examples in this repository too:
+
+- [Simple flow example](/examples/testing)
+- [Dice roller chatbot example](/examples/dice-roller-chatbot)
+- [FAQ chatbot example](/examples/faq-chatbot)
 
 ## Considerations
 

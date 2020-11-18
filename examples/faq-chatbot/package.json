@@ -1,15 +1,14 @@
 {
-  "name": "dice-roller",
+  "name": "faq-chatbot",
   "version": "1.0.0",
-  "description": "dice roller chatbot",
+  "description": "faq chatbot example",
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Arnaldo Badin",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.17.1"
-  }
+  "license": "GPL-3.0-or-later",
+  "dependencies": {},
+  "devDependencies": {}
 }
