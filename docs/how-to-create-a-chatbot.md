@@ -13,7 +13,7 @@
     - [Receive a message](#receiving-a-message)
     - [Sending a message](#sending-a-message)
 - [Putting it all together](#putting-it-all-together)
-    - [Organizing](#organizing-dialogs)
+    - [Organizing Dialogs](#organizing-dialogs)
 - [Considerations](#considerations)
 
 ## About it
