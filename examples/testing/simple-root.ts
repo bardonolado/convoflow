@@ -1,4 +1,4 @@
-import {Bot, Events, Message, MessageTypes} from "../main";
+import {Bot, Events, Message, MessageTypes} from "../../main";
 
 const main = async function() {
 	const bot = new Bot({name: "simple-bot"});

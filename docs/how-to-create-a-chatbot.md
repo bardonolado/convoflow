@@ -1,9 +1,25 @@
 # How to create a chatbot using Bard
 
+- [About it](#about-it)
+- [Introduction to Bard](#bard)
+- [Declaring a Chatbot](#chatbot)
+- [Conversation Flow](#conversation-flow)
+    - [Trailing Layer](#trailing-layer)
+    - [Incoming Layer](#incoming-layer)
+    - [Outgoing Layer](#outgoing-layer)
+    - [Additional Course functions](#course-functions)
+- [Events](#events)
+- [Message Gateway](#message-gateway)
+    - [Receive a message](#receiving-a-message)
+    - [Sending a message](#sending-a-message)
+- [Putting it all together](#putting-it-all-together)
+    - [Organizing](#organizing-dialogs)
+- [Considerations](#considerations)
+
 ## About it
 > TL;DR: Frameworks are messy and I created one to try to solved it for myself. 
 
-I am working with chatbots for at least 3 years now, and I gone through many frameworks (*good* and *not so good* ones).
+I am working with chatbots for some time now, and I gone through many frameworks (*good* and *not so good* ones).
 
 No matter which one I choose, there will always be something that, in time, will make things harder than it should. That *weak point*, most of the time, was some difficulty to generalize code and/or to create custom functionalities.
 
@@ -61,6 +77,8 @@ Conversation flow consists of layers, the **incoming layer**, the **trailing lay
 
 Each **dialog step** (function) receives two objects, **session** and **course.**  **Session** can be used to get the interaction information, to send messages and to end the session itself, resetting the progress. **Course** can be used to manage the flow, replace dialogs, jump to steps, etc.
 
+### Trailing Layer
+
 A good example of a **trailing layer** dialog:
 
 ```typescript
@@ -100,11 +118,13 @@ bot.trailing("goodbye", [
 
 Above we have a simple conversation flow that asks a question and waits for a response. We can use `session.send(message)` to send messages to user and, in this case, ask the question `How are you?`. After that ==we must stop the flow and wait for the user response, otherwise it will continue directly to the next **step function**== with the same user message, making it useless. So, to do that we need to use `course.wait()`, it will save the course progress and wait for the next user interaction, that will be handled by the next **step function**. After that we can get the new user response and send a answer based on it. Done that, we want to say bye to our user, so we are redirecting the course to a new dialog using `course.replace("goodbye")`. There ("goodbye dialog") we have a bye message and a `session.end()` call that reset the session and all its members, like storage and user info.
 
+### Incoming Layer
+
 We can evolve that in something more complex. Using **incoming layer** dialogs, we can extract intents from user input and use it to manage the flow.
 
 We can create an **incoming dialog** that just do that:
 
-```typescript
+```javascript
 /* create a incoming dialog to understand the user interaction intention */
 bot.incoming("understand-intents", [
     (session, course) => {
@@ -141,9 +161,11 @@ bot.trailing("begin-dialog", [
 ```
 The main purpose of the example above is to show how easy is to connect/integrate APIs and cognitive engines into the flow. In the **incoming dialog** ("understand-intents") we used the user input to simulate an API call, then we set the result into the `session.storage`, that are a get/setter object that you can use to store/retrieve values wherever you want in the conversation flow. After that, we can retrieve that understanding value in the "begin-dialog" using `session.storage.get("intent")` and sends a message to the user with it. The `course.end()` call will reset the course progress ==but keep all session and its data, unlike `session.end()` that resets everything==. We could also put a filter that redirect the interaction to a dialog based on the user input or it meaning, making it easier to create a diverse flow. If you want to save some values at the end of the conversation, like analytics data, you can use the **outgoing layer**.
 
+### Outgoing Layer
+
 **Outgoing layer** dialogs can be used to do some operations after the interaction completes (after trailing). An example of this:
 
-```typescript
+```javascript
 /* create an outgoing dialog to save data after interaction */
 bot.outgoing("save-data", [
     (session, course) => {
@@ -170,8 +192,10 @@ bot.trailing("begin-dialog", [
 
 The above example show us how we can use the **outgoing layer** to save and retrieve data to manipulate the conversation flow. Every time an user interacts with the chatbot a message will be choose, if the user already interacted, it will send a `Nice to see you again!` message, otherwise a `Hello, nice to meet you!` one. To know if the user already interacted we can set a "known" flag at the end of any **trailing** interaction using `session.storage.set("known", true)`. When the user enters the **trailing** "begin-dialog", we can check if the flag "known" is set to true, than choose the respective message.
 
+### Course Functions
+
 There are others **course** functions that may be helpful:
-```typescript
+```javascript
 course.jump(2) /* jump to any step on the current dialog using its index */
 course.mark("this-point") /* mark a step on flow */
 course.hop("that-point") /* hop to a marked step on flow (above) */
@@ -180,7 +204,7 @@ course.back() /* back to the last marked mark */
 
 We have some examples on the `examples` folder of this source code.
 
-##  Events
+## Events
 
 Events are custom actions that can be triggered when something happen in the chatbot. Here is the list of events:
 
@@ -196,7 +220,7 @@ ON_EXPIRE_SESSION = "Trigger when a session is expired (sessions have TTL)";
 It will fire these actions every time an event occur. An example of it:
 
 ```typescript
-import {Events} from "bard-builder";
+const {Events} = require("bard-builder");
 
 bot.event(Events.ON_RECEIVE_MESSAGE, (params) => {
     console.log(`Incoming message ${params.message?.data}.`);
@@ -211,10 +235,13 @@ bot.event(Events.ON_SEND_MESSAGE, (params) => {
 
 It is a mediator (not the pattern) between your **message broker** and the **conversation flow**. You can use `bot.push(message)` to insert a **outgoing message** or `bot.pull()` to retrieve a **incoming message**.
 
+### Receiving a Message
+
 To insert a **outgoing message** you must to instantiate a message object first. You can use the `Message` class to do it:
 
 ```typescript
-import {Message, MessageTypes} from "bard-builder";
+const {Message, MessageTypes} = require("bard-builder");
+
 const message = new Message(
     "user-contact", "user-session", "message-broker-origin",
     "message-data", MessageTypes.TEXT
@@ -229,8 +256,8 @@ bot.push(message);
 You probably are receiving from **message broker** by a **webhook**, so we will need to create one (you can use other frameworks, but to simplify we will just use `"express"`, that is a excellent a reliable framework).
 
 ```typescript
-import {Bot, Message, MessageTypes} from "bard-builder";
-import express from "express";
+const {Bot, Message, MessageTypes} = require("bard-builder");
+const express = require("express");
 
 const bot = new Bot({name: "bot-name"});
 ... /* declare dialogs and start bot */
@@ -256,11 +283,13 @@ Above we are receiving a **incoming message** from a **webhook** and creating/in
 
 Every time it happens a new interaction is executed in the **conversation flow**.
 
+### Sending a Message
+
 To send a reply for the messages sent by the **conversation flow**, in response to the ones received, we can use `bot.pull()` function. It will pull a **outgoing message** from the **conversation flow**. We can creating a pulling system and send all **outgoing messages** to our **message broker**:
 
 ```typescript
-import {Bot} from "bard-builder";
-import MyBroker from "my-broker";
+const {Bot} = require("bard-builder");
+const MyBroker = require("my-broker");
 
 const bot = new Bot({name: "bot-name"});
 ... /* declare dialogs and start bot */
@@ -301,10 +330,9 @@ Basically, to create our chatbot we will need to:
 
 So, lets put it all together:
 
-```typescript
-import {Bot, Message, MessageTypes} from "bard-builder";
-import express from "express";
-import MyBroker from "my-broker";
+```javascript
+const {Bot, Message, MessageTypes} = require("bard");
+const express = require("express");
 
 /* declare the chatbot with a simple conversation flow */
 const bot = new Bot({name: "bot-name"});
@@ -315,7 +343,10 @@ const server = express();
 setupServer(server);
 
 /* declare your message broker and start pulling messages */
-const message_broker = new MyBroker({token: "token"});
+const message_broker = {
+    sendMessage: (message) => console.log(message)
+};
+
 pullProcess();
 
 /* helper functions */
@@ -341,6 +372,9 @@ function setupConversationFlow(bot) {
             course.end();
         }
     ]);
+
+    /* start chatbot */
+    bot.start();
 }
 
 function setupServer(server) {
@@ -373,7 +407,9 @@ function pullProcess() {
 ```
 Above we have the whole chatbot put together. We are declaring a simple **conversation flow**, setting a **webhook** for  **incoming messages** and a **pulling system** to the **outgoing messages**.
 
-Obviously you can stripe all of these items into several folders/files. I suggest you create a separated folder just to hold the dialog files and a flow file to manage them:
+### Organizing Dialogs
+
+Obviously you can stripe all of these items into several folders/files. I suggest you to create a separated folder just to hold the dialog files and a flow file to manage them:
 
 ```bash
 .
@@ -384,14 +420,14 @@ Obviously you can stripe all of these items into several folders/files. I sugges
     └── intent_incoming.js
 ```
 
-```typescript
+```javascript
 /* flow.js */
 
 ...
 
-import root_trailing from "./dialogs/root_trailing";
-import bye_trailing from "./dialogs/bye_trailing";
-import intent_incoming from "./dialogs/intent_incoming";
+const root_trailing = require("./dialogs/root_trailing");
+const bye_trailing = require("./dialogs/bye_trailing");
+const intent_incoming = require("./dialogs/intent_incoming");
 
 /* declare dialog dependencies */
 const mysql = new Mysql({settings: "..."});
@@ -409,7 +445,7 @@ bot.incoming("intent", intent_incoming(deps));
 /* root_dialog.js */
 
 /* you should use deps to pass instances through dialogs */
-const dialog = function(deps) {
+module.exports = function(deps) {
     return [
         async (session, course) => {
             const users = await deps.mysql.getUsers();
@@ -419,8 +455,6 @@ const dialog = function(deps) {
         ...
     ];
 }
-
-export dialog;
 ```
 
 This is a good way to structure your dialogs, it can be a huge mess, believe me. Now you can pass dependencies through dialogs now, it will be very useful later on.

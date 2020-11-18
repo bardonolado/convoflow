@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node ./dist/main.js",
-    "test": "npm run build && node ./dist/examples/simple-root.js",
+    "test": "npm run build && node ./dist/examples/testing/simple-root.js",
     "postinstall": "npm run build"
   },
   "repository": {
