@@ -477,6 +477,6 @@ We have some examples in this repository too:
 
 I really worked on this project, tried to solve this problem for me. Found myself writing with more quality while using **Bard**. It really changed the way I developed/structured my chatbots. I hope that it will help you too.
 
-Bard is under [GNU GPLv3](LICENSE) license.
+Bard is under [GNU GPLv3](/LICENSE) license.
 
 Author: Arnaldo Badin
