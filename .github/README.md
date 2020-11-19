@@ -1,1 +1,0 @@
-../docs/how-to-create-a-chatbot.md
