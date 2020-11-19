@@ -115,6 +115,7 @@ export default class Course {
 
         if (!match) {
             this.session.setProgress(this.current_node.name, this.current_step);
+            this.state = CourseState.OVERLOAD;
             return true;
         }
 

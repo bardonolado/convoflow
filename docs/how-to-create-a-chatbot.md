@@ -14,6 +14,7 @@
     - [Sending a message](#sending-a-message)
 - [Putting it all together](#putting-it-all-together)
     - [Organizing Dialogs](#organizing-dialogs)
+- [Tutorials](#tutorials)
 - [Examples](#examples)
 - [Considerations](#considerations)
 
@@ -286,7 +287,7 @@ Every time it happens a new interaction is executed in the **conversation flow**
 
 ### Sending a Message
 
-To send a reply for the messages sent by the **conversation flow**, in response to the ones received, we can use `bot.pull()` function. It will pull a **outgoing message** from the **conversation flow**. We can creating a pulling system and send all **outgoing messages** to our **message broker**:
+To send a reply for the messages sent by the **conversation flow**, in response to the ones received, we can use `bot.pull()` function. It will pull a **outgoing message** from the **conversation flow**. We can do it by creating a pulling system and sending all **outgoing messages** to our **message broker**:
 
 ```typescript
 const {Bot} = require("bard-builder");
@@ -460,6 +461,10 @@ module.exports = function(deps) {
 
 This is a good way to structure your dialogs, it can be a huge mess, believe me. Now you can pass dependencies through dialogs now, it will be very useful later on.
 
+## Tutorials
+
+- [FAQ chatbot tutorial](/docs/creating-faq-chatbot)
+
 ## Examples
 
 We have some examples in this repository too:
@@ -471,5 +476,7 @@ We have some examples in this repository too:
 ## Considerations
 
 I really worked on this project, tried to solve this problem for me. Found myself writing with more quality while using **Bard**. It really changed the way I developed/structured my chatbots. I hope that it will help you too.
+
+Bard is under [GNU GPLv3](LICENSE) license.
 
 Author: Arnaldo Badin

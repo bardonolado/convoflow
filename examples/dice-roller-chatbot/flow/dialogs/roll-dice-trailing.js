@@ -76,6 +76,6 @@ module.exports = function(deps) {
                 return course.replace("bye");
             }
             return course.hop("choose-number-step");
-        },
+        }
     ];
 }
