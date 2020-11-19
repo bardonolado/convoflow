@@ -463,7 +463,7 @@ This is a good way to structure your dialogs, it can be a huge mess, believe me.
 
 ## Tutorials
 
-- [FAQ chatbot tutorial](/docs/creating-faq-chatbot)
+- [FAQ chatbot tutorial](/docs/creating-faq-chatbot.md)
 
 ## Examples
 
