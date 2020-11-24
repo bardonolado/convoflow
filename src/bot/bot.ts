@@ -10,6 +10,7 @@ import Emitter, {EmitterEvents, ActionFunction} from "./emitter";
 
 export {EmitterEvents as Events};
 export {Message, MessageTypes};
+export {StepFunction};
 
 export interface BotSettings {
     name: string
