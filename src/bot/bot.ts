@@ -113,9 +113,14 @@ export class Bot {
 
     private async consume() {
         const message = this.gateway.pullIncoming();
-        if (message instanceof Error) return false;
+        if (message instanceof Error) {
+            throw new Error(`Consuming error: '${message.message}'`);
+        }
 
         const result = await vow.handle(this.execute(message));
+        if (result instanceof Error) {
+            throw new Error(`Consuming error: '${result.message}'`);
+        }
         return true;
     }
 
