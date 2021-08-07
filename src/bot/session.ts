@@ -1,4 +1,4 @@
-import Message, {MessageTypes, createEmptyMessage} from "../gateway/message";
+import Message, {createEmptyMessage} from "../gateway/message";
 import Gateway from "../gateway/gateway";
 import {Mark} from "../flow/course";
 import Emitter, {EmitterEvents} from "./emitter";
@@ -148,12 +148,10 @@ export default class Session {
         return this.timestamp = Math.floor(+new Date() / 1000);
     }
 
-    public async send(data: string, type: MessageTypes = MessageTypes.TEXT) {
-        if (!data.length) throw new Error("Data must be a valid string");
-        if (!type.length) throw new Error("Type must be a valid string");
-
+    public async send(data: any) {
+        if (data == null) throw new Error("Data can't be null");
         const message = new Message(
-            this.contact, this.token, this.signature, data, type
+            this.contact, this.token, this.signature, data
         );
         if (this.gateway.pushOutgoing(message) instanceof Error) {
             throw new Error("Can't push message to dispacther");

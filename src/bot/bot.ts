@@ -3,14 +3,15 @@ import Flow, {FlowTypes} from "../flow/flow";
 import {StepFunction} from "../flow/definition";
 import Gateway from "../gateway/gateway";
 import Session from "./session";
-import Message, {MessageTypes} from "../gateway/message";
+import Message from "../gateway/message";
 import Course from "../flow/course";
 import Worker from "./worker";
 import Emitter, {EmitterEvents, ActionFunction} from "./emitter";
 
 export {EmitterEvents as Events};
-export {Message, MessageTypes};
+export {Message};
 export {StepFunction};
+export {Session, Course};
 
 export interface BotSettings {
     name: string
