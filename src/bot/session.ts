@@ -20,6 +20,7 @@ export default class Session {
     public emitter: Emitter;
     public message: Message | null;
     public contact: string;
+    public vendor: string;
     public active: boolean;
     public status: boolean;
     public node: string;
@@ -42,6 +43,7 @@ export default class Session {
 
         this.message = null;
         this.contact = "";
+        this.vendor = "";
 
         this.active = false;
         this.status = true;
@@ -83,6 +85,10 @@ export default class Session {
         return this.contact;
     }
 
+    public getVendor() {
+        return this.vendor;
+    }
+
     public getMark(value: string) {
         return this.marks.get(value);
     }
@@ -119,6 +125,10 @@ export default class Session {
         return this.contact = value;
     }
 
+    public setVendor(value: string) {
+        return this.vendor = value;
+    }
+
     public setMark(name: string, node: string, step: number): (Error | null) {
         if (!name.length) return new Error("Mark (name) must be a valid string");
         if (!node.length) return new Error("Node (name) must be a valid string");
@@ -153,6 +163,8 @@ export default class Session {
         const message = new Message(
             this.contact, this.token, this.signature, data
         );
+        if (this.vendor != "") message.vendor = this.vendor;
+        
         if (this.gateway.pushOutgoing(message) instanceof Error) {
             throw new Error("Can't push message to dispacther");
         }

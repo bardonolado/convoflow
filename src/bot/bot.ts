@@ -147,6 +147,7 @@ export class Bot {
             this.sessions.set(stamp, session);
 
             session.setContact(message.contact);
+            if (message.vendor != null) session.setVendor(message.vendor);
             this.emitter.execute(EmitterEvents.ON_CREATE_SESSION, {session})
 
             const nodes = this.flow.getNodes();
