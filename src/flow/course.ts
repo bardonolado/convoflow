@@ -15,7 +15,7 @@ export enum CourseState {
 };
 
 export default class Course {
-    private static readonly MAX_STACK = 3;
+    private static readonly MAX_STACK = 100;
 
     private flow: Flow;
     private session: Session;
