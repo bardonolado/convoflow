@@ -8,6 +8,11 @@ export interface Progress {
     step: number
 };
 
+export interface ProgressData {
+    current: Progress
+    detached: Progress[]
+};
+
 export default class Session {
     private static readonly EXPIRATION = 16 * 60 * 60;
     private static readonly MAX_HISTORY_MARKS = 3;
@@ -23,8 +28,7 @@ export default class Session {
     public vendor: string;
     public active: boolean;
     public status: boolean;
-    public node: string;
-    public step: number;
+    public progress: ProgressData;
     public marks: Map<string, Mark>;
     public history: {marks: Mark[]};
     public timestamp: number;
@@ -48,8 +52,7 @@ export default class Session {
         this.active = false;
         this.status = true;
 
-        this.node = "";
-        this.step = 0;
+        this.progress = {current: {node: "", step: 0}, detached: []};
 
         this.marks = new Map<string, Mark>();
 
@@ -66,15 +69,7 @@ export default class Session {
     }
 
     public getProgress() {
-        return {node: this.node, step: this.step};
-    }
-
-    public getNode() {
-        return this.node;
-    }
-
-    public getStep() {
-        return this.step;
+        return this.progress;
     }
 
     public getMessage() {
@@ -109,14 +104,6 @@ export default class Session {
         return this.status = value;
     }
 
-    public setNode(value: string) {
-        return this.node = value;
-    }
-
-    public setStep(value: number) {
-        return this.step = value;
-    }
-
     public setMessage(value: Message) {
         return this.message = value;
     }
@@ -145,12 +132,23 @@ export default class Session {
         return null;
     }
 
-    public setProgress(node: string, step: number = 0): (Error | null) {
-        if (!node.length) return new Error("Node (name) must be a valid string");
-        if (step < 0) return new Error("Step (node's step) must be a valid integer 0+");
+    public setProgress(progress: ProgressData): (Error | null) {
+        if (progress == null) return new Error("Progress object is missing or invalid");
 
-        this.node = node;
-        this.step = step;
+        if (progress.current == null) return new Error("Progress (current) is missing or invalid");
+        if (!progress.current.node.length) return new Error("Progress (current) Node (name) must be a valid string");
+        if (progress.current.step < 0) return new Error("Progress (current) Step (node's step) must be a valid integer 0+");
+
+        if (progress.detached == null) return new Error("Progress (detached) is missing or invalid");
+        for (let k in progress.detached) {
+            const item = progress.detached[k];
+
+            if (item == null) return new Error("Progress (detached item) is missing or invalid");
+            if (!item.node.length) return new Error("Progress (detached item) Node (name) must be a valid string");
+            if (item.step < 0) return new Error("Progress (detached item) Step (node's step) must be a valid integer 0+");
+        }
+
+        this.progress = progress;
         return null;
     }
 

@@ -156,7 +156,10 @@ export class Bot {
             const node = nodes.values().next().value;
             if (!node) throw new Error("Can't get flow node");
             
-            session.setProgress(node.name, 0);
+            session.setProgress({
+                current: {node: node.name, step: 0},
+                detached: []
+            });
         }
 
         session.setMessage(message);

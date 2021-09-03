@@ -5,10 +5,11 @@
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
   "scripts": {
-    "build": "tsc",
-    "start": "npm run build && node ./dist/main.js",
-    "test": "npm run build && node ./dist/examples/testing/simple-root.js",
-    "postinstall": "npm run build"
+    "clear": "rimraf ./dist",
+    "build": "tsc -p ./tsconfig.json",
+    "start": "npm run clear && npm run build && node ./dist/main.js",
+    "test": "npm run clear && npm run build && node ./dist/examples/testing/simple-root.js",
+    "postinstall": "npm run clear && npm run build"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "dependencies": {
     "@types/node": "^14.0.14",
     "@types/uuid": "^8.0.0",
+    "rimraf": "^3.0.2",
     "typescript": "^4.0.5",
     "uuid": "^8.2.0"
   },
