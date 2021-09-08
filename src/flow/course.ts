@@ -77,7 +77,7 @@ export default class Course {
         return true;
     }
 
-    private async call() {
+    private async call(type: FlowTypes) {
         if (this.current_step < 0) return false;
 
         let stack = 0;
@@ -90,13 +90,15 @@ export default class Course {
             this.lifes--;
 
             // rewind detached progress
-            if (this.detached_progress.length > 0 && (this.state as CourseState) == CourseState.OVERLOAD) {
-                const progress = this.detached_progress.pop();
-                if (progress != null && progress.node != null) {
-                    const step = (progress.step || 0) + 1;
-                    if (step < progress.node.chain.length) {
-                        this.current_node = progress.node;
-                        this.current_step = step;
+            if (type == FlowTypes.TRAILING) {
+                if (this.detached_progress.length > 0 && (this.state as CourseState) == CourseState.OVERLOAD) {
+                    const progress = this.detached_progress.pop();
+                    if (progress != null && progress.node != null) {
+                        const step = (progress.step || 0) + 1;
+                        if (step < progress.node.chain.length) {
+                            this.current_node = progress.node;
+                            this.current_step = step;
+                        }
                     }
                 }
             }
@@ -106,7 +108,7 @@ export default class Course {
     }
 
     private async trailing() {
-        const status = await this.call();
+        const status = await this.call(FlowTypes.TRAILING);
         this.setSessionProgress();
         return status;
     }
@@ -126,7 +128,7 @@ export default class Course {
             this.current_node = node;
             this.current_step = 0;
 
-            await this.call();
+            await this.call(type);
 
             if (this.state != CourseState.OVERLOAD) break;
         }
@@ -180,10 +182,6 @@ export default class Course {
     public wait() {
         if (this.lock) return false;
         this.lock = true;
-
-        if (this.current_step >= (this.current_node.chain.length - 1)) {
-            this.state = CourseState.OVERLOAD;
-        }
 
         this.current_step++;
         return true;
@@ -272,10 +270,6 @@ export default class Course {
         const node = this.flow.getNode(name);
         if (node instanceof Error) return false;
 
-        if (this.current_step >= (this.current_node.chain.length - 1)) {
-            this.state = CourseState.OVERLOAD;
-        }
-
         this.detached_progress.push({
             node: this.current_node,
             step: this.current_step
@@ -284,6 +278,7 @@ export default class Course {
         this.current_node = node;
         this.current_step = 0;
 
+        this.state = CourseState.DEFAULT;
         
         this.setSessionProgress();
         this.lifes++;
@@ -303,6 +298,8 @@ export default class Course {
         this.current_step = 0;
 
         this.detached_progress = [];
+
+        this.state = CourseState.DEFAULT;
 
         this.setSessionProgress();
         this.lifes++;
