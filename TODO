@@ -1,0 +1,2 @@
+[] Add storage extension (to use Redis for as session.storage, example);
+[] Change gateway, instead using only queues, use events too;

@@ -15,19 +15,17 @@ export {Session, Course};
 
 export interface BotSettings {
     name: string
-    workers?: number
 };
 
 export class Bot {
     private static readonly WORKER_DELAY = 250;
-    private static readonly WORKER_COUNT = 5;
 
     private settings: BotSettings;
     private flow: Flow;
     private sessions: Map<string, Session>;
     private emitter: Emitter;
     private gateway: Gateway;
-    private workers: Worker[];
+    private worker: Worker;
     private status: boolean;
 
     constructor(settings: BotSettings) {
@@ -38,12 +36,9 @@ export class Bot {
         this.emitter = new Emitter();
         this.gateway = new Gateway();
 
-        this.workers = [];
-        for (let i = 0; i < (this.settings.workers || Bot.WORKER_COUNT); i++) {
-            this.workers[i] = new Worker(
-                () => {return this.consume();}, {delay: Bot.WORKER_DELAY}
-            );
-        }
+        this.worker = new Worker(
+            () => {return this.consume();}, {delay: Bot.WORKER_DELAY}
+        );;
 
         this.status = false;
     }
@@ -58,10 +53,8 @@ export class Bot {
             throw new Error("Can't get any flow nodes");
         }
 
-        for (let k in this.workers) {
-            if (!this.workers[k].start()) {
-                return this.stop();
-            }
+        if (!this.worker.start()) {
+            return this.stop();
         }
 
         return true;
@@ -71,10 +64,8 @@ export class Bot {
         if (!this.status) return false;
         this.status = false;
 
-        for (let k in this.workers) {
-            await vow.handle(this.workers[k].stop());
-        }
-        
+        await vow.handle(this.worker.stop());
+
         return true;
     }
 
@@ -171,12 +162,8 @@ export class Bot {
         session.setActive(true);
         this.emitter.execute(EmitterEvents.ON_LOCK_SESSION, {session});
 
-        try {
-            const course = new Course(this.flow, session);
-            await course.run();
-        } catch(e) {
-                console.log(e)
-            }
+        const course = new Course(this.flow, session);
+        await course.run();
 
         session.setActive(false);
         this.emitter.execute(EmitterEvents.ON_UNLOCK_SESSION, {session});

@@ -3,7 +3,7 @@ import {Bot, Events, Message, StepFunction} from "../../main";
 const rootDialog: StepFunction[] = [
     (session, course) => {
         console.log("root", "1");
-        course.skip();
+        course.begin("begin");
     },
     (session, course) => {
         console.log("root", "2");
