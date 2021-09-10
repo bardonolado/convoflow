@@ -8,7 +8,7 @@
     "clear": "rimraf ./dist",
     "build": "tsc -p ./tsconfig.json",
     "start": "npm run clear && npm run build && node ./dist/main.js",
-    "test": "npm run clear && npm run build && node ./dist/examples/testing/simple-root.js",
+    "test": "npm run clear && npm run build && node ./dist/examples/testing/flow-test.js",
     "postinstall": "npm run clear && npm run build"
   },
   "repository": {

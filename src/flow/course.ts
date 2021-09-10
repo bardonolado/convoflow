@@ -88,10 +88,10 @@ export default class Course {
             await this.current_node.chain[this.current_step](this.session, this);
 
             this.lifes--;
-
+            
             // rewind detached progress
-            if (type == FlowTypes.TRAILING) {
-                if (this.detached_progress.length > 0 && (this.state as CourseState) == CourseState.OVERLOAD) {
+            if (type == FlowTypes.TRAILING && this.detached_progress.length > 0) {
+                if (this.current_step > this.current_node.chain.length - 1) {
                     const progress = this.detached_progress.pop();
                     if (progress != null && progress.node != null) {
                         const step = (progress.step || 0) + 1;
@@ -198,6 +198,19 @@ export default class Course {
 
         this.lifes++;
         this.current_step = index;
+        return true;
+    }
+
+    public skip() {
+        if (this.lock) return false;
+        this.lock = true;
+
+        if (!this.detached_progress.length) {
+            return false;
+        }
+
+        this.lifes++;
+        this.current_step = this.current_node.chain.length;
         return true;
     }
 

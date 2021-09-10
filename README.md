@@ -198,6 +198,8 @@ The above example show us how we can use the **outgoing layer** to save and retr
 
 There are others **course** functions that may be helpful:
 ```javascript
+course.begin() /* acts like replace, but it will jump back to the previous dialog when finished (must call course.next() at end) */
+course.skip() /* skip all dialog steps started with course.begin() */
 course.jump(2) /* jump to any step on the current dialog using its index */
 course.mark("this-point") /* mark a step on flow */
 course.hop("that-point") /* hop to a marked step on flow (above) */
