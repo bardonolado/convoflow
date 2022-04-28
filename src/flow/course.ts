@@ -25,6 +25,7 @@ export default class Course {
     private detached_progress: Progress[];
     private lifes: number;
     private lock: boolean;
+    private current_flow_type: FlowTypes;
     private state: CourseState;
     
     constructor(flow: Flow, session: Session) {
@@ -59,6 +60,7 @@ export default class Course {
         this.lifes = 1;
         this.lock = false;
 
+        this.current_flow_type = FlowTypes.TRAILING;
         this.state = CourseState.DEFAULT;
     }
 
@@ -77,7 +79,7 @@ export default class Course {
         return true;
     }
 
-    private async call(type: FlowTypes) {
+    private async call() {
         if (this.current_step < 0) return false;
 
         let stack = 0;
@@ -90,7 +92,7 @@ export default class Course {
             this.lifes--;
             
             // rewind detached progress
-            if (type == FlowTypes.TRAILING && this.detached_progress.length > 0) {
+            if (this.current_flow_type == FlowTypes.TRAILING && this.detached_progress.length > 0) {
                 if (this.current_step > this.current_node.chain.length - 1) {
                     const progress = this.detached_progress.pop();
                     if (progress != null && progress.node != null) {
@@ -108,12 +110,15 @@ export default class Course {
     }
 
     private async trailing() {
-        const status = await this.call(FlowTypes.TRAILING);
+        this.current_flow_type = FlowTypes.TRAILING;
+        const status = await this.call();
         this.setSessionProgress();
         return status;
     }
 
     private async middleware(type: FlowTypes) {
+        this.current_flow_type = type;
+
         let node = this.current_node;
         let step = this.current_step;
 
@@ -128,7 +133,7 @@ export default class Course {
             this.current_node = node;
             this.current_step = 0;
 
-            await this.call(type);
+            await this.call();
 
             if (this.state != CourseState.OVERLOAD) break;
         }
@@ -312,6 +317,7 @@ export default class Course {
 
         this.detached_progress = [];
 
+        this.current_flow_type = FlowTypes.TRAILING;
         this.state = CourseState.DEFAULT;
 
         this.setSessionProgress();

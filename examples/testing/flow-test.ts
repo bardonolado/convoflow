@@ -18,7 +18,7 @@ const beginDialog: StepFunction[] = [
     },
     (session, course) => {
         console.log("begin", "2");
-        course.skip();
+        course.next();
     },
     (session, course) => {
         console.log("begin", "3");
