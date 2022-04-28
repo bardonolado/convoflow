@@ -8,7 +8,7 @@
     "clear": "rimraf ./dist",
     "build": "tsc -p ./tsconfig.json",
     "start": "npm run clear && npm run build && node ./dist/main.js",
-    "test": "npm run clear && npm run build && node ./dist/examples/testing/flow-begin-test.js",
+    "test": "jest",
     "postinstall": "npm run clear && npm run build"
   },
   "repository": {
@@ -37,5 +37,9 @@
     "chatbots",
     "bots"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4"
+  }
 }

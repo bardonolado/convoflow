@@ -16,5 +16,5 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true
     },
-    "exclude": ["node_modules", "dist", "docs", ".github"]
+    "exclude": ["node_modules", "dist", "docs", "tests", ".github"]
 }
