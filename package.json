@@ -9,6 +9,7 @@
     "build": "tsc -p ./tsconfig.json",
     "start": "npm run clear && npm run build && node ./dist/main.js",
     "test": "jest",
+    "lint": "eslint . --ext .ts",
     "postinstall": "npm run clear && npm run build"
   },
   "repository": {
@@ -39,6 +40,9 @@
   ],
   "devDependencies": {
     "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
+    "@typescript-eslint/parser": "^5.21.0",
+    "eslint": "^8.14.0",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.4"
   }

@@ -1,0 +1,51 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "parserOptions": {
+        "ecmaFeatures": {
+            "impliedStrict": true
+        }
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+        "no-console": "warn",
+        "no-irregular-whitespace": "error",
+        "no-unused-vars": "warn",
+        "no-else-return": "warn",
+        "no-eval": "error",
+        "comma-dangle": "error",
+        "object-curly-spacing": ["error", "never"],
+        "semi-spacing": "error",
+        "array-bracket-spacing": ["error", "never"],
+        "no-multiple-empty-lines": "error",
+        "space-before-function-paren": ["error", "never"],
+        "space-in-parens": "error",
+        "no-trailing-spaces": "error",
+        "no-with": "error",
+        "semi": "off",
+        "@typescript-eslint/semi": ["error"],
+        "indent": [2, "tab"],
+        "no-mixed-spaces-and-tabs": "error",
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/member-delimiter-style": [
+            "warn",
+            {
+                "multiline": {
+                    "delimiter": "none",
+                    "requireLast": false
+                },
+                "singleline": {
+                    "delimiter": "comma",
+                    "requireLast": true
+                }
+            }
+        ]
+    }
+}

@@ -7,4 +7,4 @@ export type StepFunction = (session: Session, course: Course) => (any | Promise<
 export interface Progress {
     node: Node
     step: number
-};
+}

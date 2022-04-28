@@ -10,43 +10,43 @@ export enum EmitterEvents {
     ON_REFRESH_SESSION = "on-refresh-session",
     ON_RECEIVE_MESSAGE = "on-receive-message",
     ON_SEND_MESSAGE = "on-send-message"
-};
+}
 
 export interface ActionParams {
     session?: Session
     message?: Message
-};
+}
 
 export type ActionFunction = (params: ActionParams) => void;
 
 export default class Emitter {
-    private events: Map<EmitterEvents, ActionFunction[]>;
+	private events: Map<EmitterEvents, ActionFunction[]>;
 
-    constructor() {
-        this.events = new Map<EmitterEvents, ActionFunction[]>();
-    }
+	constructor() {
+		this.events = new Map<EmitterEvents, ActionFunction[]>();
+	}
 
-    public set(event: EmitterEvents, action: ActionFunction): (Error | null) {
-        const item = this.events.get(event);
+	public set(event: EmitterEvents, action: ActionFunction): (Error | null) {
+		const item = this.events.get(event);
 
-        if (!item) this.events.set(event, [action]);
-        else item.push(action);
+		if (!item) this.events.set(event, [action]);
+		else item.push(action);
 
-        return null;
-    }
+		return null;
+	}
 
-    public get(event: EmitterEvents): (ActionFunction[] | Error) {
-        const item = this.events.get(event);
-        if (!item) return new Error("Can't get any event");
-        return item;
-    }
+	public get(event: EmitterEvents): (ActionFunction[] | Error) {
+		const item = this.events.get(event);
+		if (!item) return new Error("Can't get any event");
+		return item;
+	}
 
-    public execute(event: EmitterEvents, params: ActionParams): (Error | null) {
-        const actions = this.get(event);
-        if (actions instanceof Error) return actions;
+	public execute(event: EmitterEvents, params: ActionParams): (Error | null) {
+		const actions = this.get(event);
+		if (actions instanceof Error) return actions;
 
-        for (let k in actions) {
-            actions[k](params);
-        }
-        return null;
-    }}
+		for (const k in actions) {
+			actions[k](params);
+		}
+		return null;
+	}}
