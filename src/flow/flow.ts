@@ -1,4 +1,4 @@
-import {StepFunction} from "./definition";
+import {Chain} from "./definition";
 import Node from "./node";
 
 export enum FlowTypes {
@@ -7,21 +7,21 @@ export enum FlowTypes {
     OUTGOING = "outgoing"
 }
 
-export default class Flow {
-	private nodes: Map<FlowTypes, Map<string, Node>>;
+export default class Flow<StorageType> {
+	private nodes: Map<FlowTypes, Map<string, Node<StorageType>>>;
 
 	constructor() {
-		this.nodes = new Map<FlowTypes, Map<string, Node>>();
+		this.nodes = new Map<FlowTypes, Map<string, Node<StorageType>>>();
 		this.setup();
 	}
 
 	private setup() {
 		for (const [item, value] of Object.entries(FlowTypes)) {
-			this.nodes.set(value, new Map<FlowTypes, Node>());
+			this.nodes.set(value, new Map<FlowTypes, Node<StorageType>>());
 		}
 	}
 
-	public getNode(name: string, type: FlowTypes = FlowTypes.TRAILING): (Error | Node) {
+	public getNode(name: string, type: FlowTypes = FlowTypes.TRAILING): (Error | Node<StorageType>) {
 		const nodes = this.nodes.get(type);
 		if (!nodes) return new Error("Can't get any node");
 
@@ -31,13 +31,13 @@ export default class Flow {
 		return new Error("Can't get any node");
 	}
 
-	public getNodes(type: FlowTypes = FlowTypes.TRAILING): (Error | Map<string, Node>) {
+	public getNodes(type: FlowTypes = FlowTypes.TRAILING): (Error | Map<string, Node<StorageType>>) {
 		const nodes = this.nodes.get(type);
 		if (!(nodes && nodes.size)) return new Error("Can't get any nodes");
 		return nodes;
 	}
 
-	public insertNode(name: string, chain: StepFunction[], type: FlowTypes = FlowTypes.TRAILING): (Error | null) {
+	public insertNode(name: string, chain: Chain<StorageType>, type: FlowTypes = FlowTypes.TRAILING): (Error | null) {
 		if (!(this.getNode(name, type) instanceof Error)) {
 			return new Error("Node already exist");
 		}

@@ -17,22 +17,42 @@
     "rules": {
         "no-console": "warn",
         "no-irregular-whitespace": "error",
-        "no-unused-vars": "warn",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "warn",
         "no-else-return": "warn",
         "no-eval": "error",
         "comma-dangle": "error",
-        "object-curly-spacing": ["error", "never"],
+        "object-curly-spacing": [
+            "error",
+            "never"
+        ],
         "semi-spacing": "error",
-        "array-bracket-spacing": ["error", "never"],
+        "array-bracket-spacing": [
+            "error",
+            "never"
+        ],
         "no-multiple-empty-lines": "error",
-        "space-before-function-paren": ["error", "never"],
         "space-in-parens": "error",
         "no-trailing-spaces": "error",
         "no-with": "error",
         "semi": "off",
-        "@typescript-eslint/semi": ["error"],
-        "indent": [2, "tab"],
+        "@typescript-eslint/semi": [
+            "error"
+        ],
+        "indent": [
+            2,
+            "tab"
+        ],
         "no-mixed-spaces-and-tabs": "error",
+        "@typescript-eslint/no-empty-interface": "off",
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "double"
+        ],
         "@typescript-eslint/no-empty-function": "off",
         "@typescript-eslint/member-delimiter-style": [
             "warn",
@@ -47,5 +67,9 @@
                 }
             }
         ]
+    },
+    "devDependencies": {
+        "@types/node": "^18.0.0",
+        "jest": "^28.1.2"
     }
 }

@@ -12,21 +12,21 @@ export enum EmitterEvents {
     ON_SEND_MESSAGE = "on-send-message"
 }
 
-export interface ActionParams {
-    session?: Session
+export interface ActionParams<StorageType> {
+    session?: Session<StorageType>
     message?: Message
 }
 
-export type ActionFunction = (params: ActionParams) => void;
+export type ActionFunction<StorageType> = (params: ActionParams<StorageType>) => void;
 
-export default class Emitter {
-	private events: Map<EmitterEvents, ActionFunction[]>;
+export default class Emitter<StorageType> {
+	private events: Map<EmitterEvents, ActionFunction<StorageType>[]>;
 
 	constructor() {
-		this.events = new Map<EmitterEvents, ActionFunction[]>();
+		this.events = new Map<EmitterEvents, ActionFunction<StorageType>[]>();
 	}
 
-	public set(event: EmitterEvents, action: ActionFunction): (Error | null) {
+	public set(event: EmitterEvents, action: ActionFunction<StorageType>): (Error | null) {
 		const item = this.events.get(event);
 
 		if (!item) this.events.set(event, [action]);
@@ -35,13 +35,13 @@ export default class Emitter {
 		return null;
 	}
 
-	public get(event: EmitterEvents): (ActionFunction[] | Error) {
+	public get(event: EmitterEvents): (ActionFunction<StorageType>[] | Error) {
 		const item = this.events.get(event);
 		if (!item) return new Error("Can't get any event");
 		return item;
 	}
 
-	public execute(event: EmitterEvents, params: ActionParams): (Error | null) {
+	public execute(event: EmitterEvents, params: ActionParams<StorageType>): (Error | null) {
 		const actions = this.get(event);
 		if (actions instanceof Error) return actions;
 

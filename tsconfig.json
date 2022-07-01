@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "lib": ["ES2021"],
         "target": "es6",
         "module": "commonjs",
         "allowJs": true,
@@ -16,5 +17,5 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true
     },
-    "exclude": ["node_modules", "dist", "docs", "tests", ".github"]
+    "exclude": ["node_modules", "dist", "docs", "tests", ".github", "examples"]
 }

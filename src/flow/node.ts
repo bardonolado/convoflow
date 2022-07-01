@@ -1,10 +1,10 @@
-import {StepFunction} from "./definition";
+import {Chain} from "./definition";
 
-export default class Node {
+export default class Node<StorageType> {
 	public name: string;
-	public chain: StepFunction[];
+	public chain: Chain<StorageType>;
 
-	constructor(name: string, chain: StepFunction[]) {
+	constructor(name: string, chain: Chain<StorageType>) {
 		if (!name.length) throw new Error(`Name must be a valid string`);
 		if (!chain.length) throw new Error(`Chain must be a valid array`);
 

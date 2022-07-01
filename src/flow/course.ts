@@ -1,13 +1,7 @@
 import Session from "../bot/session";
-import {Progress} from "./definition";
+import {isStepFunction, Progress} from "./definition";
 import Flow, {FlowTypes} from "./flow";
 import Node from "./node";
-
-export type Mark = {
-    name: string
-    node: string
-    step: number
-};
 
 export enum CourseState {
     DEFAULT = "default",
@@ -15,20 +9,20 @@ export enum CourseState {
     OVERLOAD = "overload"
 }
 
-export default class Course {
+export default class Course<StorageType> {
 	private static readonly MAX_STACK = 250;
 
-	private flow: Flow;
-	private session: Session;
-	private current_node: Node;
+	private flow: Flow<StorageType>;
+	private session: Session<StorageType>;
+	private current_node: Node<StorageType>;
 	private current_step: number;
-	private detached_progress: Progress[];
+	private detached_progress: Progress<StorageType>[];
 	private lifes: number;
 	private lock: boolean;
 	private current_flow_type: FlowTypes;
 	private state: CourseState;
 
-	constructor(flow: Flow, session: Session) {
+	constructor(flow: Flow<StorageType>, session: Session<StorageType>) {
 		this.flow = flow;
 		this.session = session;
 
@@ -40,7 +34,7 @@ export default class Course {
 		const node = this.flow.getNode(progress.current.node);
 		if (node instanceof Error) throw new Error(`Can't get flow node '${progress.current.node}'`);
 
-		const detached_progress: Progress[] = [];
+		const detached_progress: Progress<StorageType>[] = [];
 		for (const k in progress.detached) {
 			const item = progress.detached[k];
 
@@ -87,7 +81,8 @@ export default class Course {
 			this.lock = false;
 			this.state = CourseState.DEFAULT;
 
-			await this.current_node.chain[this.current_step](this.session, this);
+			const current_step = this.current_node.chain[this.current_step];
+			await (isStepFunction(current_step) ? current_step : current_step.action)(this.session, this);
 
 			this.lifes--;
 
@@ -192,17 +187,23 @@ export default class Course {
 		return true;
 	}
 
-	public jump(index: number) {
+	public jump(step: number | string) {
 		if (this.lock) return false;
 		this.lock = true;
 
-		if (index < 0) return false;
-		if (index > this.current_node.chain.length - 1) {
+		if (typeof step === "string") {
+			step = this.current_node.chain.findIndex(value => {
+				return isStepFunction(value) ? false : value.name === step;
+			});
+		}
+
+		if (step < 0) return false;
+		if (step > this.current_node.chain.length - 1) {
 			return false;
 		}
 
 		this.lifes++;
-		this.current_step = index;
+		this.current_step = step;
 		return true;
 	}
 
@@ -219,50 +220,7 @@ export default class Course {
 		return true;
 	}
 
-	public mark(value: string) {
-		if (!value.length) return false;
-		return this.session.setMark(value, this.current_node.name, this.current_step);
-	}
-
-	public hop(name: string) {
-		if (this.lock) return false;
-		this.lock = true;
-
-		if (!name.length) return false;
-
-		const mark = this.session.getMark(name);
-		if (!mark) return false;
-
-		const node = this.flow.getNode(mark.node);
-		if (node instanceof Error) return false;
-
-		this.current_node = node;
-		this.current_step = mark.step;
-
-		this.setSessionProgress();
-		this.lifes++;
-		return true;
-	}
-
-	public back() {
-		if (this.lock) return false;
-		this.lock = true;
-
-		const mark = this.session.getLastMark();
-		if (!mark) return false;
-
-		const node = this.flow.getNode(mark.node);
-		if (node instanceof Error) return false;
-
-		this.current_node = node;
-		this.current_step = mark.step;
-
-		this.setSessionProgress();
-		this.lifes++;
-		return true;
-	}
-
-	public restart() {
+	public again() {
 		if (this.lock) return false;
 		this.lock = true;
 

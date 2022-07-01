@@ -1,6 +1,6 @@
 import vow from "../utils/vow";
 import Flow, {FlowTypes} from "../flow/flow";
-import {StepFunction} from "../flow/definition";
+import {Chain, StepFunction} from "../flow/definition";
 import Gateway from "../gateway/gateway";
 import Session from "./session";
 import Message from "../gateway/message";
@@ -10,28 +10,28 @@ import Emitter, {EmitterEvents, ActionFunction} from "./emitter";
 
 export {EmitterEvents as Events};
 export {Message};
-export {StepFunction};
+export {Chain, StepFunction};
 export {Session, Course};
 
-export interface BotSettings {
+export interface BotSettings<StorageType> {
     name: string
 }
 
-export class Bot {
+export class Bot<StorageType> {
 	private static readonly WORKER_DELAY = 250;
 
-	private settings: BotSettings;
-	private flow: Flow;
-	private sessions: Map<string, Session>;
-	private emitter: Emitter;
+	private settings: BotSettings<StorageType>;
+	private flow: Flow<StorageType>;
+	private sessions: Map<string, Session<StorageType>>;
+	private emitter: Emitter<StorageType>;
 	private gateway: Gateway;
 	private worker: Worker;
 	private status: boolean;
 
-	constructor(settings: BotSettings) {
+	constructor(settings: BotSettings<StorageType>) {
 		this.settings = settings;
 
-		this.sessions = new Map<string, Session>();
+		this.sessions = new Map<string, Session<StorageType>>();
 		this.flow = new Flow();
 		this.emitter = new Emitter();
 		this.gateway = new Gateway();
@@ -73,22 +73,22 @@ export class Bot {
 		return this.signature;
 	}
 
-	public incoming(name: string, chain: StepFunction[]) {
+	public incoming(name: string, chain: Chain<StorageType>) {
 		if (this.status) throw new Error(`Can't insert node after startup`);
 		return this.flow.insertNode(name, chain, FlowTypes.INCOMING);
 	}
 
-	public trailing(name: string, chain: StepFunction[]) {
+	public trailing(name: string, chain: Chain<StorageType>) {
 		if (this.status) throw new Error(`Can't insert node after startup`);
 		return this.flow.insertNode(name, chain, FlowTypes.TRAILING);
 	}
 
-	public outgoing(name: string, chain: StepFunction[]) {
+	public outgoing(name: string, chain: Chain<StorageType>) {
 		if (this.status) throw new Error(`Can't insert node after startup`);
 		return this.flow.insertNode(name, chain, FlowTypes.OUTGOING);
 	}
 
-	public event(event: EmitterEvents, action: ActionFunction) {
+	public event(event: EmitterEvents, action: ActionFunction<StorageType>) {
 		if (this.status) throw new Error(`Can't insert event after startup`);
 		return this.emitter.set(event, action);
 	}
@@ -134,7 +134,7 @@ export class Bot {
 		}
 
 		if (!session) {
-			session = new Session(stamp, this.settings.name, this.gateway, this.emitter);
+			session = new Session<StorageType>(stamp, this.settings.name, this.gateway, this.emitter);
 			this.sessions.set(stamp, session);
 
 			session.setContact(message.contact);

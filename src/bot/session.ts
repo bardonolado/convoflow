@@ -1,6 +1,5 @@
 import Message, {createEmptyMessage} from "../gateway/message";
 import Gateway from "../gateway/gateway";
-import {Mark} from "../flow/course";
 import Emitter, {EmitterEvents} from "./emitter";
 
 export interface Progress {
@@ -13,31 +12,29 @@ export interface ProgressData {
     detached: Progress[]
 }
 
-export default class Session {
+export default class Session<StorageType> {
 	private static readonly EXPIRATION = 16 * 60 * 60;
 	private static readonly MAX_HISTORY_MARKS = 3;
 
-	public storage: Map<string, any>;
+	public storage: Partial<StorageType>;
 
 	public token: string;
 	public signature: string;
 	public gateway: Gateway;
-	public emitter: Emitter;
+	public emitter: Emitter<StorageType>;
 	public message: Message | null;
 	public contact: string;
 	public vendor: string;
 	public active: boolean;
 	public status: boolean;
 	public progress: ProgressData;
-	public marks: Map<string, Mark>;
-	public history: {marks: Mark[],};
 	public timestamp: number;
 
-	constructor(token: string, signature: string, gateway: Gateway, emitter: Emitter) {
+	constructor(token: string, signature: string, gateway: Gateway, emitter: Emitter<StorageType>) {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!signature.length) throw new Error("Invalid or missing signature string");
 
-		this.storage = new Map<string, any>();
+		this.storage = {};
 
 		this.token = token;
 		this.signature = signature;
@@ -54,9 +51,6 @@ export default class Session {
 
 		this.progress = {current: {node: "", step: 0}, detached: []};
 
-		this.marks = new Map<string, Mark>();
-
-		this.history = {marks : []};
 		this.timestamp = Math.floor(+new Date() / 1000);
 	}
 
@@ -84,14 +78,6 @@ export default class Session {
 		return this.vendor;
 	}
 
-	public getMark(value: string) {
-		return this.marks.get(value);
-	}
-
-	public getLastMark() {
-		return this.history.marks[this.history.marks.length - 1];
-	}
-
 	public isExpired() {
 		return (Math.floor(+new Date() / 1000) > (this.timestamp + Session.EXPIRATION));
 	}
@@ -114,22 +100,6 @@ export default class Session {
 
 	public setVendor(value: string) {
 		return this.vendor = value;
-	}
-
-	public setMark(name: string, node: string, step: number): (Error | null) {
-		if (!name.length) return new Error("Mark (name) must be a valid string");
-		if (!node.length) return new Error("Node (name) must be a valid string");
-		if (step < 0) return new Error("Step (node's step) must be a valid integer 0+");
-
-		const mark = {name, node, step};
-
-		if (this.history.marks.length > Session.MAX_HISTORY_MARKS) {
-			this.history.marks.shift();
-		}
-		this.history.marks.push(mark);
-
-		this.marks.set(name, mark);
-		return null;
 	}
 
 	public setProgress(progress: ProgressData): (Error | null) {

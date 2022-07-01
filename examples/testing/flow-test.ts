@@ -1,6 +1,10 @@
-import {Bot, Events, Message, StepFunction} from "../../main";
+import {Bot, Chain, Events, Message, StepFunction} from "../../main";
 
-const rootDialog: StepFunction[] = [
+interface StorageType {
+    test: boolean;
+}
+
+const rootDialog: Chain<StorageType> = [
     (session, course) => {
         console.log("root", "1");
         course.begin("begin");
@@ -11,15 +15,15 @@ const rootDialog: StepFunction[] = [
     }
 ];
 
-const beginDialog: StepFunction[] = [
+const beginDialog: Chain<StorageType> = [
     (session, course) => {
         console.log("begin", "1");
         course.next();
     },
-    (session, course) => {
+    {name: "step-two", action: (session, course) => {
         console.log("begin", "2");
         course.next();
-    },
+    }},
     (session, course) => {
         console.log("begin", "3");
         course.next();
@@ -31,7 +35,7 @@ const beginDialog: StepFunction[] = [
 ];
 
 const main = async function() {
-	const bot = new Bot({name: "simple-bot"});
+	const bot = new Bot<StorageType>({name: "simple-bot"});
 
 	bot.trailing("root", rootDialog);
 	bot.trailing("begin", beginDialog);
