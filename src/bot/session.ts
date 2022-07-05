@@ -19,7 +19,7 @@ export default class Session<StorageType> {
 	public storage: Partial<StorageType>;
 
 	public token: string;
-	public signature: string;
+	public origin: string;
 	public gateway: Gateway;
 	public emitter: Emitter<StorageType>;
 	public message: Message | null;
@@ -30,14 +30,14 @@ export default class Session<StorageType> {
 	public progress: ProgressData;
 	public timestamp: number;
 
-	constructor(token: string, signature: string, gateway: Gateway, emitter: Emitter<StorageType>) {
+	constructor(token: string, origin: string, initial_storage: StorageType, gateway: Gateway, emitter: Emitter<StorageType>) {
 		if (!token.length) throw new Error("Invalid or missing token string");
-		if (!signature.length) throw new Error("Invalid or missing signature string");
+		if (!origin.length) throw new Error("Invalid or missing origin string");
 
-		this.storage = {};
+		this.storage = initial_storage;
 
 		this.token = token;
-		this.signature = signature;
+		this.origin = origin;
 
 		this.gateway = gateway;
 		this.emitter = emitter;
@@ -129,7 +129,7 @@ export default class Session<StorageType> {
 	public async send(data: any) {
 		if (data == null) throw new Error("Data can't be null");
 		const message = new Message(
-			this.contact, this.token, this.signature, data
+			this.contact, this.token, this.origin, data
 		);
 		if (this.vendor != "") message.vendor = this.vendor;
 

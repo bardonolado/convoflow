@@ -1,3 +1,6 @@
+import {v4 as uuidv4} from "uuid";
+import lodash from "lodash";
+
 import vow from "../utils/vow";
 import Flow, {FlowTypes} from "../flow/flow";
 import {Chain, StepFunction} from "../flow/definition";
@@ -14,13 +17,14 @@ export {Chain, StepFunction};
 export {Session, Course};
 
 export interface BotSettings<StorageType> {
-    name: string
+    name?: string
+	initial_storage: StorageType
 }
 
-export class Bot<StorageType> {
+export class Bot<StorageType = {[key: string]: any}> {
 	private static readonly WORKER_DELAY = 250;
 
-	private settings: BotSettings<StorageType>;
+	private settings: PickRequired<BotSettings<StorageType>, "name">;
 	private flow: Flow<StorageType>;
 	private sessions: Map<string, Session<StorageType>>;
 	private emitter: Emitter<StorageType>;
@@ -29,7 +33,10 @@ export class Bot<StorageType> {
 	private status: boolean;
 
 	constructor(settings: BotSettings<StorageType>) {
-		this.settings = settings;
+		this.settings = {...settings,
+			name: settings.name || `bot-#${uuidv4()}`,
+			initial_storage: lodash.cloneDeep(settings.initial_storage)
+		};
 
 		this.sessions = new Map<string, Session<StorageType>>();
 		this.flow = new Flow();
@@ -134,7 +141,7 @@ export class Bot<StorageType> {
 		}
 
 		if (!session) {
-			session = new Session<StorageType>(stamp, this.settings.name, this.gateway, this.emitter);
+			session = new Session<StorageType>(stamp, this.settings.name, this.settings.initial_storage, this.gateway, this.emitter);
 			this.sessions.set(stamp, session);
 
 			session.setContact(message.contact);

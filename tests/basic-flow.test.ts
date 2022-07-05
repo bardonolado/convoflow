@@ -107,7 +107,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		bot = new Bot({name: "simple-bot"})
+		bot = new Bot({name: "simple-bot", initial_storage: {}})
 
 		bot.incoming("incoming", incomingDialog);
 	
@@ -176,7 +176,7 @@ describe("jump flow", () => {
 			},
 		];
 	
-		bot = new Bot({name: "simple-bot"})
+		bot = new Bot({initial_storage: {}})
 
 		bot.trailing("root", rootDialog);
 
