@@ -16,29 +16,29 @@ export {Message};
 export {Chain, StepFunction};
 export {Session, Course};
 
-export interface BotSettings<StorageType> {
+export interface BotSettings<State> {
     name: string
-	initial_storage: StorageType
+	state: State
 }
 
-export class Bot<StorageType extends {[key: string]: any}> {
+export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	private static readonly WORKER_DELAY = 250;
 
-	private settings: BotSettings<StorageType>;
-	private flow: Flow<StorageType>;
-	private sessions: Map<string, Session<StorageType>>;
-	private emitter: Emitter<StorageType>;
+	private settings: BotSettings<State>;
+	private flow: Flow<State>;
+	private sessions: Map<string, Session<State>>;
+	private emitter: Emitter<State>;
 	private gateway: Gateway;
 	private worker: Worker;
 	private status: boolean;
 
-	constructor(settings: Optional<BotSettings<StorageType>, "name">) {
+	constructor(settings: Optional<BotSettings<State>, "name">) {
 		this.settings = {...settings,
 			name: settings.name || `bot-#${uuidv4()}`,
-			initial_storage: lodash.cloneDeep(settings.initial_storage || {})
+			state: lodash.cloneDeep(settings.state || {})
 		};
 
-		this.sessions = new Map<string, Session<StorageType>>();
+		this.sessions = new Map<string, Session<State>>();
 		this.flow = new Flow();
 		this.emitter = new Emitter();
 		this.gateway = new Gateway();
@@ -78,22 +78,22 @@ export class Bot<StorageType extends {[key: string]: any}> {
 		return this.signature;
 	}
 
-	public incoming(name: string, chain: Chain<StorageType>) {
+	public incoming(name: string, chain: Chain<State>) {
 		if (this.status) throw new Error(`Can't insert node after startup`);
 		return this.flow.insertNode(name, chain, FlowTypes.INCOMING);
 	}
 
-	public trailing(name: string, chain: Chain<StorageType>) {
+	public trailing(name: string, chain: Chain<State>) {
 		if (this.status) throw new Error(`Can't insert node after startup`);
 		return this.flow.insertNode(name, chain, FlowTypes.TRAILING);
 	}
 
-	public outgoing(name: string, chain: Chain<StorageType>) {
+	public outgoing(name: string, chain: Chain<State>) {
 		if (this.status) throw new Error(`Can't insert node after startup`);
 		return this.flow.insertNode(name, chain, FlowTypes.OUTGOING);
 	}
 
-	public event(event: EmitterEvents, action: ActionFunction<StorageType>) {
+	public event(event: EmitterEvents, action: ActionFunction<State>) {
 		if (this.status) throw new Error(`Can't insert event after startup`);
 		return this.emitter.set(event, action);
 	}
@@ -139,7 +139,7 @@ export class Bot<StorageType extends {[key: string]: any}> {
 		}
 
 		if (!session) {
-			session = new Session<StorageType>(stamp, this.settings.name, this.settings.initial_storage, this.gateway, this.emitter);
+			session = new Session<State>(stamp, this.settings.name, this.settings.state, this.gateway, this.emitter);
 			this.sessions.set(stamp, session);
 
 			session.setContact(message.contact);

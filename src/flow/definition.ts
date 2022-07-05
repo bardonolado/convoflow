@@ -2,20 +2,20 @@ import Session from "../bot/session";
 import Course from "./course";
 import Node from "./node";
 
-export type StepFunction<StorageType> = (session: Session<StorageType>, course: Course<StorageType>) => (any | Promise<any>);
+export type StepFunction<State> = (session: Session<State>, course: Course<State>) => (any | Promise<any>);
 
-export type WrappedStepFunction<StorageType> = {
+export type WrappedStepFunction<State> = {
 	name: string;
-	action: StepFunction<StorageType>;
+	action: StepFunction<State>;
 };
 
-export type Chain<StorageType> = (StepFunction<StorageType> | WrappedStepFunction<StorageType>)[];
+export type Chain<State> = (StepFunction<State> | WrappedStepFunction<State>)[];
 
-export function isStepFunction<StorageType>(value: StepFunction<StorageType> | WrappedStepFunction<StorageType>): value is StepFunction<StorageType>  {
-	return !(<WrappedStepFunction<StorageType>>value).action;
+export function isStepFunction<State>(value: StepFunction<State> | WrappedStepFunction<State>): value is StepFunction<State>  {
+	return !(<WrappedStepFunction<State>>value).action;
 };
 
-export interface Progress<StorageType> {
-    node: Node<StorageType>
+export interface Progress<State> {
+    node: Node<State>
     step: number
 }

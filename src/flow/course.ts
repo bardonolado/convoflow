@@ -9,20 +9,20 @@ export enum CourseState {
     OVERLOAD = "overload"
 }
 
-export default class Course<StorageType> {
+export default class Course<State> {
 	private static readonly MAX_STACK = 250;
 
-	private flow: Flow<StorageType>;
-	private session: Session<StorageType>;
-	private current_node: Node<StorageType>;
+	private flow: Flow<State>;
+	private session: Session<State>;
+	private current_node: Node<State>;
 	private current_step: number;
-	private detached_progress: Progress<StorageType>[];
+	private detached_progress: Progress<State>[];
 	private lifes: number;
 	private lock: boolean;
 	private current_flow_type: FlowTypes;
 	private state: CourseState;
 
-	constructor(flow: Flow<StorageType>, session: Session<StorageType>) {
+	constructor(flow: Flow<State>, session: Session<State>) {
 		this.flow = flow;
 		this.session = session;
 
@@ -34,7 +34,7 @@ export default class Course<StorageType> {
 		const node = this.flow.getNode(progress.current.node);
 		if (node instanceof Error) throw new Error(`Can't get flow node '${progress.current.node}'`);
 
-		const detached_progress: Progress<StorageType>[] = [];
+		const detached_progress: Progress<State>[] = [];
 		for (const k in progress.detached) {
 			const item = progress.detached[k];
 

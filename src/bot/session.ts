@@ -12,16 +12,16 @@ export interface ProgressData {
     detached: Progress[]
 }
 
-export default class Session<StorageType> {
+export default class Session<State> {
 	private static readonly EXPIRATION = 16 * 60 * 60;
 	private static readonly MAX_HISTORY_MARKS = 3;
 
-	public storage: StorageType;
+	public state: State;
 
 	public token: string;
 	public origin: string;
 	public gateway: Gateway;
-	public emitter: Emitter<StorageType>;
+	public emitter: Emitter<State>;
 	public message: Message | null;
 	public contact: string;
 	public vendor: string;
@@ -30,11 +30,11 @@ export default class Session<StorageType> {
 	public progress: ProgressData;
 	public timestamp: number;
 
-	constructor(token: string, origin: string, initial_storage: StorageType, gateway: Gateway, emitter: Emitter<StorageType>) {
+	constructor(token: string, origin: string, state: State, gateway: Gateway, emitter: Emitter<State>) {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
-		this.storage = initial_storage;
+		this.state = state;
 
 		this.token = token;
 		this.origin = origin;

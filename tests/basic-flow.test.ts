@@ -1,6 +1,6 @@
 import {Bot, Message, Chain} from "../main";
 
-type StorageType = any;
+type State = any;
 
 beforeAll(() => {
 	global.console.log = jest.fn();
@@ -37,10 +37,10 @@ const waitForMessages = () => {
 };
 
 describe("basic flow", () => {
-	let bot: Bot<StorageType>;
+	let bot: Bot<State>;
 
 	beforeAll(async () => {
-		const incomingDialog: Chain<StorageType> = [
+		const incomingDialog: Chain<State> = [
 			(session, course) => {
 				console.log("incoming", "1");
 				if (session.getMessage().data === "redirect-message") {
@@ -55,7 +55,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		const rootDialog: Chain<StorageType> = [
+		const rootDialog: Chain<State> = [
 			(session, course) => {
 				console.log("root", "1");
 				course.next();
@@ -66,7 +66,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		const secondDialog: Chain<StorageType> = [
+		const secondDialog: Chain<State> = [
 			(session, course) => {
 				console.log("second", "1");
 				course.begin("wait");
@@ -77,7 +77,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		const redirectDialog: Chain<StorageType> = [
+		const redirectDialog: Chain<State> = [
 			(session, course) => {
 				console.log("redirect", "1");
 				course.begin("begin");
@@ -88,7 +88,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		const beginDialog: Chain<StorageType> = [
+		const beginDialog: Chain<State> = [
 			(session, course) => {
 				console.log("begin", "1");
 				course.next();
@@ -107,7 +107,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		bot = new Bot({name: "simple-bot", initial_storage: {}})
+		bot = new Bot({name: "simple-bot", state: {}})
 
 		bot.incoming("incoming", incomingDialog);
 	
@@ -163,8 +163,8 @@ describe("jump flow", () => {
 			}},
 			(session, course) => {
 				console.log("root", "3");
-				session.storage.count = (session.storage.count || 0) + 1;
-				if (session.storage.count <= 2) {
+				session.state.count = (session.state.count || 0) + 1;
+				if (session.state.count <= 2) {
 					course.jump("step-two");
 					return;
 				}
@@ -176,7 +176,7 @@ describe("jump flow", () => {
 			},
 		];
 	
-		bot = new Bot({initial_storage: {count: 0}})
+		bot = new Bot({state: {count: 0}})
 
 		bot.trailing("root", rootDialog);
 
