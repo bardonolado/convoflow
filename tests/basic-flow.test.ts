@@ -176,7 +176,7 @@ describe("jump flow", () => {
 			},
 		];
 	
-		bot = new Bot({initial_storage: {}})
+		bot = new Bot({initial_storage: {count: 0}})
 
 		bot.trailing("root", rootDialog);
 

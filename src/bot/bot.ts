@@ -17,14 +17,14 @@ export {Chain, StepFunction};
 export {Session, Course};
 
 export interface BotSettings<StorageType> {
-    name?: string
+    name: string
 	initial_storage: StorageType
 }
 
 export class Bot<StorageType = {[key: string]: any}> {
 	private static readonly WORKER_DELAY = 250;
 
-	private settings: PickRequired<BotSettings<StorageType>, "name">;
+	private settings: BotSettings<StorageType>;
 	private flow: Flow<StorageType>;
 	private sessions: Map<string, Session<StorageType>>;
 	private emitter: Emitter<StorageType>;
@@ -32,7 +32,7 @@ export class Bot<StorageType = {[key: string]: any}> {
 	private worker: Worker;
 	private status: boolean;
 
-	constructor(settings: BotSettings<StorageType>) {
+	constructor(settings: Optional<BotSettings<StorageType>, "name">) {
 		this.settings = {...settings,
 			name: settings.name || `bot-#${uuidv4()}`,
 			initial_storage: lodash.cloneDeep(settings.initial_storage)
@@ -43,9 +43,7 @@ export class Bot<StorageType = {[key: string]: any}> {
 		this.emitter = new Emitter();
 		this.gateway = new Gateway();
 
-		this.worker = new Worker(
-			() => {return this.consume();}, {delay: Bot.WORKER_DELAY}
-		);
+		this.worker = new Worker(() => this.consume(), {delay: Bot.WORKER_DELAY});
 
 		this.status = false;
 	}
