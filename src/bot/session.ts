@@ -16,7 +16,7 @@ export default class Session<StorageType> {
 	private static readonly EXPIRATION = 16 * 60 * 60;
 	private static readonly MAX_HISTORY_MARKS = 3;
 
-	public storage: Partial<StorageType>;
+	public storage: StorageType;
 
 	public token: string;
 	public origin: string;
