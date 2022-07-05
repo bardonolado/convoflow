@@ -21,7 +21,7 @@ export interface BotSettings<StorageType> {
 	initial_storage: StorageType
 }
 
-export class Bot<StorageType = {[key: string]: any}> {
+export class Bot<StorageType extends {[key: string]: any}> {
 	private static readonly WORKER_DELAY = 250;
 
 	private settings: BotSettings<StorageType>;
@@ -35,7 +35,7 @@ export class Bot<StorageType = {[key: string]: any}> {
 	constructor(settings: Optional<BotSettings<StorageType>, "name">) {
 		this.settings = {...settings,
 			name: settings.name || `bot-#${uuidv4()}`,
-			initial_storage: lodash.cloneDeep(settings.initial_storage)
+			initial_storage: lodash.cloneDeep(settings.initial_storage || {})
 		};
 
 		this.sessions = new Map<string, Session<StorageType>>();
