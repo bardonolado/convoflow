@@ -1,4 +1,4 @@
-import {v4 as uuidv4} from "uuid";
+import {v4 as uuid} from "uuid";
 import vow from "../utils/vow";
 
 export type OperationFunction = (...args: any[]) => Promise<any>;
@@ -18,7 +18,7 @@ export default class Worker {
 	constructor(operation: OperationFunction, settings: WorkerSettings) {
 		this.operation = operation;
 		this.settings = settings;
-		this.token = uuidv4();
+		this.token = uuid();
 		this.status = false;
 	}
 

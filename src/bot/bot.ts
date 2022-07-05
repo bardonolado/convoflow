@@ -1,4 +1,4 @@
-import {v4 as uuidv4} from "uuid";
+import {v4 as uuid} from "uuid";
 import lodash from "lodash";
 
 import vow from "../utils/vow";
@@ -36,7 +36,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 
 	constructor(settings: BotSettings<State>) {
 		this.settings = {...settings,
-			name: settings.name || `bot-#${uuidv4()}`,
+			name: settings.name || `bot-#${uuid()}`,
 			state: lodash.cloneDeep(settings.state) ?? {}
 		};
 
