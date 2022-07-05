@@ -1,6 +1,6 @@
 import {Bot, Message, Chain} from "../main";
 
-type State = any;
+type State = Record<string, any>;
 
 beforeAll(() => {
 	global.console.log = jest.fn();
@@ -107,7 +107,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		bot = new Bot({name: "simple-bot", state: {}})
+		bot = new Bot({name: "simple-bot"})
 
 		bot.incoming("incoming", incomingDialog);
 	
@@ -176,7 +176,7 @@ describe("jump flow", () => {
 			},
 		];
 	
-		bot = new Bot({state: {count: 0}})
+		bot = new Bot<{count: number}>({state: {count: 0}});
 
 		bot.trailing("root", rootDialog);
 

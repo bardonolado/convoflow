@@ -16,15 +16,17 @@ export {Message};
 export {Chain, StepFunction};
 export {Session, Course};
 
-export interface BotSettings<State> {
+export type BotSettings<State> = IfEquals<State, ObjectLiteral, 1, 0> extends 1 ? Optional<Settings<State>, "name" | "state"> : Optional<Settings<State>, "name">;
+
+interface Settings<State> {
     name: string
-	state: State
+	state: State | ObjectLiteral
 }
 
 export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	private static readonly WORKER_DELAY = 250;
 
-	private settings: BotSettings<State>;
+	private settings: Settings<State>;
 	private flow: Flow<State>;
 	private sessions: Map<string, Session<State>>;
 	private emitter: Emitter<State>;
@@ -32,10 +34,10 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	private worker: Worker;
 	private status: boolean;
 
-	constructor(settings: Optional<BotSettings<State>, "name">) {
+	constructor(settings: BotSettings<State>) {
 		this.settings = {...settings,
 			name: settings.name || `bot-#${uuidv4()}`,
-			state: lodash.cloneDeep(settings.state || {})
+			state: lodash.cloneDeep(settings.state) ?? {}
 		};
 
 		this.sessions = new Map<string, Session<State>>();
