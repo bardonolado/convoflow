@@ -2,7 +2,7 @@ import {v4 as uuid} from "uuid";
 import lodash from "lodash";
 
 import vow from "../utils/vow";
-import logger from "../utils/logger";
+import logger, {LogLevel} from "../utils/logger";
 import Flow, {FlowTypes} from "../flow/flow";
 import {Chain, StepFunction} from "../flow/definition";
 import Gateway from "../gateway/gateway";
@@ -22,7 +22,7 @@ export type BotSettings<State> = Optional<Settings<State>, "name">
 interface Settings<State> {
     name: string
 	state: State
-	debug?: boolean
+	log_level?: LogLevel
 }
 
 export class Bot<State extends ObjectLiteral = ObjectLiteral> {
@@ -51,7 +51,9 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 
 		this.status = false;
 
-		if (this.settings.debug) logger.enable();
+		if (this.settings.log_level) {
+			logger.enable(this.settings.log_level);
+		}
 	}
 
 	public async start() {

@@ -1,16 +1,25 @@
-export type LogType = "error" | "success" | "warning" | "info" | "event" | "in" | "out"
+export type LogType = "error" | "warning" | "success" | "info";
+export type LogLevel = "error" | "debug" | "info";
 
 class Logger {
 	private static instance: Logger;
+	private static readonly LEVELS: Record<LogLevel, number> = {
+		"error": 1,
+		"debug": 2,
+		"info": 3
+	}
+
 	private status = false;
+	private level: LogLevel = "info";
 
 	constructor() {
 		if (Logger.instance) return Logger.instance;
 		Logger.instance = this;
 	}
 
-	public enable() {
+	public enable(level: keyof typeof Logger.LEVELS = "info") {
 		this.status = true;
+		this.level = level;
 	}
 
 	public disable() {
@@ -21,25 +30,16 @@ class Logger {
 		if (!this.status) return;
 		switch (type) {
 			case "error":
-				console.log(`[-] Error: ${message}`);
-				break;
-			case "success":
-				console.log(`[+] Success: ${message}`);
-				break;
-			case "info":
-				console.log(`[!] Info: ${message}`);
+				Logger.LEVELS[this.level] <= Logger.LEVELS["error"] && console.log(`[-] Error: ${message}`);
 				break;
 			case "warning":
-				console.log(`[!] Warning: ${message}`);
+				Logger.LEVELS[this.level] <= Logger.LEVELS["debug"] && console.log(`[!] Warning: ${message}`);
 				break;
-			case "event":
-				console.log(`[#] Event: ${message}`);
+			case "info":
+				Logger.LEVELS[this.level] <= Logger.LEVELS["info"] && console.log(`[#] Info: ${message}`);
 				break;
-			case "in":
-				console.log(`[>] In: ${message}`);
-				break;
-			case "out":
-				console.log(`[<] Out: ${message}`);
+			case "success":
+				Logger.LEVELS[this.level] <= Logger.LEVELS["info"] && console.log(`[+] Success: ${message}`);
 				break;
 		}
 	}
