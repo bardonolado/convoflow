@@ -107,7 +107,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		bot = new Bot({name: "simple-bot"})
+		bot = new Bot({name: "simple-bot", state: {}})
 
 		bot.incoming("incoming", incomingDialog);
 	

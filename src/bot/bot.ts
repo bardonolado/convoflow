@@ -17,11 +17,11 @@ export {Message};
 export {Chain, StepFunction};
 export {Session, Course};
 
-export type BotSettings<State> = IfEquals<State, ObjectLiteral, 1, 0> extends 1 ? Optional<Settings<State>, "name" | "state"> : Optional<Settings<State>, "name">;
+export type BotSettings<State> = Optional<Settings<State>, "name">
 
 interface Settings<State> {
     name: string
-	state: State | ObjectLiteral
+	state: State
 	debug?: boolean
 }
 
@@ -39,7 +39,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	constructor(settings: BotSettings<State>) {
 		this.settings = {...settings,
 			name: settings.name || `bot-#${uuid()}`,
-			state: lodash.cloneDeep(settings.state) ?? {}
+			state: lodash.cloneDeep(settings.state)
 		};
 
 		this.sessions = new Map<string, Session<State>>();

@@ -16,7 +16,7 @@ export default class Session<State> {
 	private static readonly EXPIRATION = 16 * 60 * 60;
 	private static readonly MAX_HISTORY_MARKS = 3;
 
-	public state: State | ObjectLiteral;
+	public state: State;
 
 	public token: string;
 	public origin: string;
@@ -30,7 +30,7 @@ export default class Session<State> {
 	public progress: ProgressData;
 	public timestamp: number;
 
-	constructor(token: string, origin: string, state: State | ObjectLiteral, gateway: Gateway, emitter: Emitter<State>) {
+	constructor(token: string, origin: string, state: State, gateway: Gateway, emitter: Emitter<State>) {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
