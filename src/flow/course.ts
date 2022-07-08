@@ -86,7 +86,7 @@ export default class Course<State> {
 			try {
 				await (isStepFunction(current_step) ? current_step : current_step.action)(this.session, this);
 			} catch (error) {
-				logger.log("error", `Step failed at '${this.current_node.name}' - step '${current_step}': ${error}`);
+				logger.log("error", `Step failed at '${this.current_node.name}' - step '${this.current_step}': ${error}`);
 			}
 
 			this.lifes--;
