@@ -246,12 +246,6 @@ export default class Course<State> {
 			
 		this.lock = true;
 
-		// TODO - again incoming
-		if (this.current_flow_type !== FlowTypes.TRAILING) {
-			logger.log("warning", `[skip] - Can't call this action directly at incoming/outgoing layers.`);
-			return false;
-		}
-
 		this.lifes++;
 		return true;
 	}
@@ -263,11 +257,6 @@ export default class Course<State> {
 		}
 			
 		this.lock = true;
-
-		if (this.current_flow_type !== FlowTypes.TRAILING) {
-			logger.log("warning", `[skip] - Can't call this action directly at incoming/outgoing layers.`);
-			return false;
-		}
 
 		this.lifes++;
 		this.current_step = 0;
