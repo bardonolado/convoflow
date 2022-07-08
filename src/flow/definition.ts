@@ -9,7 +9,7 @@ export type WrappedStepFunction<State> = {
 	action: StepFunction<State>;
 };
 
-export type Chain<State> = (StepFunction<State> | WrappedStepFunction<State>)[];
+export type Chain<State = ObjectLiteral> = (StepFunction<State> | WrappedStepFunction<State>)[];
 
 export function isStepFunction<State>(value: StepFunction<State> | WrappedStepFunction<State>): value is StepFunction<State>  {
 	return !(<WrappedStepFunction<State>>value).action;

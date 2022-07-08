@@ -39,7 +39,7 @@ const waitForMessages = () => {
 describe("basic flow", () => {
 	let bot: Bot<State>;
 
-	beforeAll(async () => {
+	beforeEach(async () => {
 		const incomingDialog: Chain<State> = [
 			(session, course) => {
 				console.log("incoming", "1");
@@ -119,7 +119,7 @@ describe("basic flow", () => {
 		await bot.start();
 	});
 
-	afterAll(() => {
+	afterEach(() => {
 		bot.stop()
 	});
 
@@ -148,22 +148,46 @@ describe("basic flow", () => {
 	});
 });
 
-describe("jump flow", () => {
-	let bot: Bot<{count: number}>;
+describe("jump action flow", () => {
+	type ThisState = {count: number};
+	let bot: Bot<ThisState>;
 
-	beforeAll(async () => {
-		const rootDialog: Chain<{count: number}> = [
+	beforeEach(async () => {
+		const incomingDialog: Chain<ThisState> = [
+			(session, course) => {
+				console.log("incoming", "1");
+				course.next();
+			},
+			{name: "step-two", action: (session, course) => {
+				console.log("incoming", "2");
+				session.state.count += 1;
+				course.next();
+			}},
+			(session, course) => {
+				console.log("incoming", "3");
+				if (session.getMessage().data === "jump incoming" && session.state.count < 2) {
+					return course.jump("step-two");
+				}
+				session.state.count = 0;
+				course.next();
+			},
+		];
+
+		const rootDialog: Chain<ThisState> = [
 			(session, course) => {
 				console.log("root", "1");
 				course.next();
 			},
 			{name: "step-two", action: (session, course) => {
 				console.log("root", "2");
+				if (session.getMessage().data === "skip") {
+					return course.skip();
+				}
 				course.next();
 			}},
 			(session, course) => {
 				console.log("root", "3");
-				session.state.count = (session.state.count || 0) + 1;
+				session.state.count += 1;
 				if (session.state.count <= 2) {
 					course.jump("step-two");
 					return;
@@ -176,14 +200,16 @@ describe("jump flow", () => {
 			},
 		];
 	
-		bot = new Bot<{count: number}>({state: {count: 0}});
+		bot = new Bot<ThisState>({state: {count: 0}});
+
+		bot.incoming("incoming", incomingDialog);
 
 		bot.trailing("root", rootDialog);
 
 		await bot.start();
 	});
 
-	afterAll(() => {
+	afterEach(() => {
 		bot.stop()
 	});
 
@@ -192,17 +218,126 @@ describe("jump flow", () => {
 	const session_token = "token";
 	const origin = "test";
 
-	it("should replace in the second message to the redirect dialog and start begin dialog from there", async() => {
-		bot.push(new Message(contact, session_token, origin, "message"));
-		bot.push(new Message(contact, session_token, origin, "redirect-message"));
-		bot.push(new Message(contact, session_token, origin, "message"));
+	it("should loop to step-to until check if pass", async() => {
 		bot.push(new Message(contact, session_token, origin, "message"));
 
 		await waitForMessages();
 
 		const expected_calling_order = [
-			"root 1", "root 2", "root 3", "root 2", "root 3",
+			"incoming 1", "incoming 2", "incoming 3", "root 1", "root 2", "root 3", "root 2", "root 3",
 			"root 2", "root 3", "root 4"
+		];
+
+		expect(console.log).toBeCalled();
+		expect(bot_calling_order).toEqual(expected_calling_order);
+	});
+
+	it("should jump one time in incoming trailing", async() => {
+		bot.push(new Message(contact, session_token, origin, "jump incoming"));
+
+		await waitForMessages();
+
+		const expected_calling_order = [
+			"incoming 1", "incoming 2", "incoming 3", "incoming 2", "incoming 3", "root 1", "root 2", "root 3", "root 2", "root 3",
+			"root 2", "root 3", "root 4"
+		];
+
+		expect(console.log).toBeCalled();
+		expect(bot_calling_order).toEqual(expected_calling_order);
+	});
+});
+
+describe("skip action flow", () => {
+	let bot: Bot;
+
+	beforeEach(async () => {
+		const incomingDialog: Chain = [
+			(session, course) => {
+				console.log("incoming", "1");
+				if (session.getMessage().data === "skip") {
+					return course.skip();
+				}
+				course.next();
+			},
+			(session, course) => {
+				console.log("incoming", "2");
+				course.next();
+			}
+		];
+
+		const rootDialog: Chain = [
+			(session, course) => {
+				console.log("root", "1");
+				course.begin("begin");
+			},
+			(session, course) => {
+				console.log("root", "2");
+				course.replace("first");
+			}
+		];
+
+		const firstDialog: Chain = [
+			(session, course) => {
+				console.log("first", "1");
+				course.skip();
+			},
+			(session, course) => {
+				console.log("first", "2");
+				course.next();
+			}
+		];
+
+		const beginDialog: Chain = [
+			(session, course) => {
+				console.log("begin", "1");
+				course.skip();
+			},
+			(session, course) => {
+				console.log("begin", "2");
+				course.next();
+			}
+		];
+	
+		bot = new Bot({state: {}});
+
+		bot.incoming("incoming", incomingDialog);
+
+		bot.trailing("root", rootDialog);
+		bot.trailing("first", firstDialog);
+		bot.trailing("begin", beginDialog);
+
+		await bot.start();
+	});
+
+	afterEach(() => {
+		bot.stop()
+	});
+
+	/* user input simulation */
+	const contact = "contact";
+	const session_token = "token";
+	const origin = "test";
+
+	it("should skip first and begin dialog", async() => {
+		bot.push(new Message(contact, session_token, origin, "message"));
+
+		await waitForMessages();
+
+		const expected_calling_order = [
+			"incoming 1", "incoming 2", "root 1", "begin 1", "root 2", "first 1"
+		];
+
+		expect(console.log).toBeCalled();
+		expect(bot_calling_order).toEqual(expected_calling_order);
+	});
+
+	it("should skip incoming dialog", async() => {
+		bot.push(new Message(contact, session_token, origin, "skip"));
+
+		await waitForMessages();
+
+		const expected_calling_order = [
+			"incoming 1", "root 1", "begin 1", "root 2", "first 1"
 		];
 
 		expect(console.log).toBeCalled();

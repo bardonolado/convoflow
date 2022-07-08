@@ -232,13 +232,9 @@ export default class Course<State> {
 			
 		this.lock = true;
 
-		// TODO - check if this checking is used
-		if (!this.detached_progress.length) {
-			return false;
-		}
-
 		this.lifes++;
-		this.current_step = this.current_node.chain.length;
+		this.current_step = this.current_node.chain.length + 1;
+		this.state = CourseState.OVERLOAD;
 		return true;
 	}
 
@@ -249,6 +245,12 @@ export default class Course<State> {
 		}
 			
 		this.lock = true;
+
+		// TODO - again incoming
+		if (this.current_flow_type !== FlowTypes.TRAILING) {
+			logger.log("warning", `[skip] - Can't call this action directly at incoming/outgoing layers.`);
+			return false;
+		}
 
 		this.lifes++;
 		return true;
@@ -262,6 +264,11 @@ export default class Course<State> {
 			
 		this.lock = true;
 
+		if (this.current_flow_type !== FlowTypes.TRAILING) {
+			logger.log("warning", `[skip] - Can't call this action directly at incoming/outgoing layers.`);
+			return false;
+		}
+
 		this.lifes++;
 		this.current_step = 0;
 		return true;
@@ -274,6 +281,11 @@ export default class Course<State> {
 		}
 			
 		this.lock = true;
+
+		if (this.current_flow_type !== FlowTypes.TRAILING) {
+			logger.log("warning", `[begin] - Can't call this action directly at incoming/outgoing layers.`);
+			return false;
+		}
 
 		const node = this.flow.getNode(name);
 		if (node instanceof Error) {
