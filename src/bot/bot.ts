@@ -2,6 +2,7 @@ import {v4 as uuid} from "uuid";
 import lodash from "lodash";
 
 import vow from "../utils/vow";
+import logger from "../utils/logger";
 import Flow, {FlowTypes} from "../flow/flow";
 import {Chain, StepFunction} from "../flow/definition";
 import Gateway from "../gateway/gateway";
@@ -21,6 +22,7 @@ export type BotSettings<State> = IfEquals<State, ObjectLiteral, 1, 0> extends 1 
 interface Settings<State> {
     name: string
 	state: State | ObjectLiteral
+	debug?: boolean
 }
 
 export class Bot<State extends ObjectLiteral = ObjectLiteral> {
@@ -48,6 +50,8 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		this.worker = new Worker(() => this.consume(), {delay: Bot.WORKER_DELAY});
 
 		this.status = false;
+
+		if (this.settings.debug) logger.enable();
 	}
 
 	public async start() {

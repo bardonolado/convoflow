@@ -2,6 +2,7 @@ import Session from "../bot/session";
 import {isStepFunction, Progress} from "./definition";
 import Flow, {FlowTypes} from "./flow";
 import Node from "./node";
+import logger from "../utils/logger";
 
 export enum CourseState {
     DEFAULT = "default",
@@ -82,7 +83,11 @@ export default class Course<State> {
 			this.state = CourseState.DEFAULT;
 
 			const current_step = this.current_node.chain[this.current_step];
-			await (isStepFunction(current_step) ? current_step : current_step.action)(this.session, this);
+			try {
+				await (isStepFunction(current_step) ? current_step : current_step.action)(this.session, this);
+			} catch (error) {
+				logger.log("error", `Step failed at '${this.current_node.name}' - step '${current_step}': ${error}`);
+			}
 
 			this.lifes--;
 
@@ -167,7 +172,11 @@ export default class Course<State> {
 	}
 
 	public next() {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[next] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
 		if (this.current_step >= (this.current_node.chain.length - 1)) {
@@ -180,7 +189,11 @@ export default class Course<State> {
 	}
 
 	public wait() {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[wait] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
 		this.current_step++;
@@ -188,7 +201,11 @@ export default class Course<State> {
 	}
 
 	public jump(step: number | string) {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[jump] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
 		if (typeof step === "string") {
@@ -197,8 +214,8 @@ export default class Course<State> {
 			});
 		}
 
-		if (step < 0) return false;
-		if (step > this.current_node.chain.length - 1) {
+		if (step < 0 || step > this.current_node.chain.length - 1) {
+			logger.log("warning", "[jump] - Step is out of range.");
 			return false;
 		}
 
@@ -208,9 +225,14 @@ export default class Course<State> {
 	}
 
 	public skip() {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[skip] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
+		// TODO - check if this checking is used
 		if (!this.detached_progress.length) {
 			return false;
 		}
@@ -221,7 +243,11 @@ export default class Course<State> {
 	}
 
 	public again() {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[again] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
 		this.lifes++;
@@ -229,7 +255,11 @@ export default class Course<State> {
 	}
 
 	public reset() {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[reset] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
 		this.lifes++;
@@ -238,13 +268,18 @@ export default class Course<State> {
 	}
 
 	public begin(name: string) {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[begin] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
-		if (!name.length) return false;
-
 		const node = this.flow.getNode(name);
-		if (node instanceof Error) return false;
+		if (node instanceof Error) {
+			logger.log("warning", `[begin] - Can't find node: '${name}'.`);
+			return false;
+		}
 
 		this.detached_progress.push({
 			node: this.current_node,
@@ -262,13 +297,18 @@ export default class Course<State> {
 	}
 
 	public replace(name: string) {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[replace] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
-		if (!name.length) return false;
-
 		const node = this.flow.getNode(name);
-		if (node instanceof Error) return false;
+		if (node instanceof Error) {
+			logger.log("warning", `[replace] - Can't find node: '${name}'.`);
+			return false;
+		}
 
 		this.current_node = node;
 		this.current_step = 0;
@@ -284,17 +324,27 @@ export default class Course<State> {
 	}
 
 	public end() {
-		if (this.lock) return false;
+		if (this.lock) {
+			logger.log("warning", "[end] - Can't run any action in this step anymore.");
+			return false;
+		}
+			
 		this.lock = true;
 
 		this.lifes = 0;
 		this.state = CourseState.COMPLETED;
 
 		const nodes = this.flow.getNodes();
-		if (nodes instanceof Error) return false;
+		if (nodes instanceof Error) {
+			logger.log("warning", `[end] - Can't find any nodes.`);
+			return false;
+		}
 
 		const node = nodes.values().next().value;
-		if (!node) return false;
+		if (!node) {
+			logger.log("warning", `[end] - Can't find node.`);
+			return false;
+		}
 
 		this.current_node = node;
 		this.current_step = 0;

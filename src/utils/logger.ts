@@ -1,3 +1,5 @@
+export type LogType = "error" | "success" | "warning" | "info" | "event" | "in" | "out"
+
 class Logger {
 	private static instance: Logger;
 	private status = false;
@@ -15,39 +17,31 @@ class Logger {
 		this.status = false;
 	}
 
-	public error(message: string) {
-		if (!this.status) return false;
-		return console.log(`[*] Error: ${message}`);
-	}
-
-	public success(message: string) {
-		if (!this.status) return false;
-		return console.log(`[+] Success: ${message}`);
-	}
-
-	public fail(message: string) {
-		if (!this.status) return false;
-		return console.log(`[!] Error: ${message}`);
-	}
-
-	public info(message: string) {
-		if (!this.status) return false;
-		return console.log(`[*] Info: ${message}`);
-	}
-
-	public event(message: string) {
-		if (!this.status) return false;
-		return console.log(`[#] Event: ${message}`);
-	}
-
-	public in(message: string) {
-		if (!this.status) return false;
-		return console.log(`[>] In: ${message}`);
-	}
-
-	public out(message: string) {
-		if (!this.status) return false;
-		return console.log(`[<] Out: ${message}`);
+	public log(type: LogType, message: string) {
+		if (!this.status) return;
+		switch (type) {
+			case "error":
+				console.log(`[-] Error: ${message}`);
+				break;
+			case "success":
+				console.log(`[+] Success: ${message}`);
+				break;
+			case "info":
+				console.log(`[!] Info: ${message}`);
+				break;
+			case "warning":
+				console.log(`[!] Warning: ${message}`);
+				break;
+			case "event":
+				console.log(`[#] Event: ${message}`);
+				break;
+			case "in":
+				console.log(`[>] In: ${message}`);
+				break;
+			case "out":
+				console.log(`[<] Out: ${message}`);
+				break;
+		}
 	}
 }
 
