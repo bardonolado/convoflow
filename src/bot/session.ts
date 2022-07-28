@@ -1,3 +1,5 @@
+import lodash from "lodash";
+
 import Message, {createEmptyMessage} from "../gateway/message";
 import Gateway from "../gateway/gateway";
 import Emitter, {EmitterEvents} from "./emitter";
@@ -34,7 +36,7 @@ export default class Session<State> {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
-		this.state = state;
+		this.state = lodash.cloneDeep(state);
 
 		this.token = token;
 		this.origin = origin;

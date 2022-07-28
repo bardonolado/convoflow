@@ -1,5 +1,4 @@
 import {v4 as uuid} from "uuid";
-import lodash from "lodash";
 
 import vow from "../utils/vow";
 import logger, {LogLevel} from "../utils/logger";
@@ -39,7 +38,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	constructor(settings: BotSettings<State>) {
 		this.settings = {...settings,
 			name: settings.name || `bot-#${uuid()}`,
-			state: lodash.cloneDeep(settings.state)
+			state: settings.state
 		};
 
 		this.sessions = new Map<string, Session<State>>();
