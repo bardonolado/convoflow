@@ -287,11 +287,11 @@ It is a mediator (not the pattern) between your **message broker** and the **con
 To insert a **outgoing message** you must to instantiate a message object first. You can use the `Message` class to do it:
 
 ```typescript
-const {Message, MessageTypes} = require("bard-builder");
+const {Message} = require("bard-builder");
 
 const message = new Message(
     "user-contact", "user-session", "message-broker-origin",
-    "message-data", MessageTypes.TEXT
+    "message-data"
 );
 
 ...
@@ -303,7 +303,7 @@ bot.push(message);
 You probably are receiving from **message broker** by a **webhook**, so we will need to create one (you can use other frameworks, but to simplify we will just use `"express"`, that is a excellent a reliable framework).
 
 ```typescript
-const {Bot, Message, MessageTypes} = require("bard-builder");
+const {Bot, Message} = require("bard-builder");
 const express = require("express");
 
 const bot = new Bot({name: "bot-name"});
@@ -317,7 +317,7 @@ server.use(express.json());
 server.post("/receive/message", (request, response) => {
     const body = request.body;
     /* use bot.push(message_object) to send a message to the conversation flow */
-    bot.push(new Message(body.contact, body.session, body.origin, body.data, MessageTypes.TEXT));
+    bot.push(new Message(body.contact, body.session, body.origin, body.data));
     return response.status(200).send("OK");
 });
 
@@ -378,7 +378,7 @@ Basically, to create our chatbot we will need to:
 So, lets put it all together:
 
 ```javascript
-const {Bot, Message, MessageTypes} = require("bard");
+const {Bot, Message} = require("bard");
 const express = require("express");
 
 interface State {
@@ -435,7 +435,7 @@ function setupServer(server) {
     server.post("/receive/message", (request, response) => {
         const body = request.body;
         /* use bot.push(message_object) to send a message to the conversation flow */
-        bot.push(new Message(body.contact, body.session, body.origin, body.data, MessageTypes.TEXT));
+        bot.push(new Message(body.contact, body.session, body.origin, body.data));
         return response.status(200).send("OK");
     });
     server.listen(8888);
