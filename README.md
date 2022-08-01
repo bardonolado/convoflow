@@ -67,7 +67,7 @@ bot.start();
 
 After you instantiate your chatbot, you can start creating the conversation flow.
 
-### Chatbot State:
+### State:
 
 You can pass the parameter `state` to Bot settings as the initial state value. This will be used to create the base for our state. And you also can ensure a type for it, passing as Generics parameter:
 
