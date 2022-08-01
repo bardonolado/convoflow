@@ -48,17 +48,17 @@ It is simple to create, just import the bard module and create a Bot instance:
 
 ```typescript
 import {Bot} from "bard-builder";
-const bot = new Bot({name: "simple-bot"});
+const bot = new Bot({state: {}});
 
 /* to start both conversation flow and message gateway */
 bot.start();
 ```
 
-Or using `require`/`module.exports`:
+Or using `require`/`module.exports` (vannila js):
 
 ```javascript
 const bard = require("bard-builder");
-const bot = new bard.Bot({name: "simple-bot"});
+const bot = new bard.Bot({state: {}});
 
 bot.start();
 ```
@@ -66,6 +66,21 @@ bot.start();
 ==Remeber to use the `bard.` prefix when not using ES6 modules import==
 
 After you instantiate your chatbot, you can start creating the conversation flow.
+
+### Chatbot State:
+
+You can pass the parameter `state` to Bot settings as the initial state value. This will be used to create the base for our state. And you also can ensure a type for it, passing as Generics parameter:
+
+```typescript
+interface State {
+    products_sold: number
+    have_discount?: boolean
+}
+
+const bot = new Bot<State>({state: {
+    products_sold: 0
+}});
+```
 
 ## Conversation flow
 
@@ -89,13 +104,13 @@ A good example of a **trailing layer** dialog:
     it will send some message, then it will say bye and end the session.
 */
 bot.trailing("greetings", [
-    (session, course) => {
+    (course, course) => {
         session.send("Hello, how are you?");
         /*
             stops flow and wait for the next interation,
             that will be handled by the next step-function
         */
-        session.wait();
+        course.wait();
     },
     (session, course) => {
         /* get user message from session */
@@ -105,20 +120,20 @@ bot.trailing("greetings", [
         else session.send("Bad :/");
         
         /* redirect the current interaction to the "goodbye" dialog */
-        session.replace("goodbye");
+        course.replace("goodbye");
     }
 ]);
 
 bot.trailing("goodbye", [
     (session, course) => {
         session.send("Goodbye!");
-        /* session.end() reset all conversation progress (steps, storage, etc) and delete the current session */
+        /* session.end() reset all conversation progress (steps, state, etc) and delete the current session */
         session.end();
     }
 ]);
 ```
 
-Above we have a simple conversation flow that asks a question and waits for a response. We can use `session.send(message)` to send messages to user and, in this case, ask the question `How are you?`. After that ==we must stop the flow and wait for the user response, otherwise it will continue directly to the next **step function**== with the same user message, making it useless. So, to do that we need to use `course.wait()`, it will save the course progress and wait for the next user interaction, that will be handled by the next **step function**. After that we can get the new user response and send a answer based on it. Done that, we want to say bye to our user, so we are redirecting the course to a new dialog using `course.replace("goodbye")`. There ("goodbye dialog") we have a bye message and a `session.end()` call that reset the session and all its members, like storage and user info.
+Above we have a simple conversation flow that asks a question and waits for a response. We can use `session.send(message)` to send messages to user and, in this case, ask the question `How are you?`. After that ==we must stop the flow and wait for the user response, otherwise it will continue directly to the next **step function**== with the same user message, making it useless. So, to do that we need to use `course.wait()`, it will save the course progress and wait for the next user interaction, that will be handled by the next **step function**. After that we can get the new user response and send a answer based on it. Done that, we want to say bye to our user, so we are redirecting the course to a new dialog using `course.replace("goodbye")`. There ("goodbye dialog") we have a bye message and a `session.end()` call that reset the session and all its members, like state and user info.
 
 ### Incoming Layer
 
@@ -130,8 +145,8 @@ We can create an **incoming dialog** that just do that:
 /* create a incoming dialog to understand the user interaction intention */
 bot.incoming("understand-intents", [
     (session, course) => {
-        /* clear previous intent from storage (it is a storage bound to the session) */
-        session.storage.set("intent", null);
+        /* clear previous intent from state (it is a state bound to the session) */
+        session.state.intent = null;
         
         /* get message and its data from session */
         const message = session.getMessage().data;
@@ -142,8 +157,8 @@ bot.incoming("understand-intents", [
         else if (data == "bad") intent = "something-bad";
         else if (data == "idiot") intent = "something-rude";
 
-	/* set the intent into session storage, can be retrieve later on */
-        if (intent) session.storage.set("intent", intent);
+	    /* set the intent into session state, can be retrieve later on */
+        if (intent) session.state.intent = intent;
 
         /* ensure to keep the flow going */
         return course.next();
@@ -153,7 +168,7 @@ bot.incoming("understand-intents", [
 /* example of usage */
 bot.trailing("begin-dialog", [
     (session, course) => {
-        const intent = session.storage.get("intent");
+        const intent = session.state.intent;
         if (intent != null) session.send(`Your intention was: '${intent}'`);
         else session.send("Can't detected any intention");
         /* course.end() will reset progress, but it will keep the session and its values */
@@ -161,7 +176,7 @@ bot.trailing("begin-dialog", [
     }
 ]);
 ```
-The main purpose of the example above is to show how easy is to connect/integrate APIs and cognitive engines into the flow. In the **incoming dialog** ("understand-intents") we used the user input to simulate an API call, then we set the result into the `session.storage`, that are a get/setter object that you can use to store/retrieve values wherever you want in the conversation flow. After that, we can retrieve that understanding value in the "begin-dialog" using `session.storage.get("intent")` and sends a message to the user with it. The `course.end()` call will reset the course progress ==but keep all session and its data, unlike `session.end()` that resets everything==. We could also put a filter that redirect the interaction to a dialog based on the user input or it meaning, making it easier to create a diverse flow. If you want to save some values at the end of the conversation, like analytics data, you can use the **outgoing layer**.
+The main purpose of the example above is to show how easy is to connect/integrate APIs and cognitive engines into the flow. In the **incoming dialog** ("understand-intents") we used the user input to simulate an API call, then we set the result into the `session.state`, that are a get/setter object that you can use to store/retrieve values wherever you want in the conversation flow. After that, we can retrieve that understanding value in the "begin-dialog" using `session.state.intent` and sends a message to the user with it. The `course.end()` call will reset the course progress ==but keep all session and its data, unlike `session.end()` that resets everything==. We could also put a filter that redirect the interaction to a dialog based on the user input or it meaning, making it easier to create a diverse flow. If you want to save some values at the end of the conversation, like analytics data, you can use the **outgoing layer**.
 
 ### Outgoing Layer
 
@@ -172,7 +187,7 @@ The main purpose of the example above is to show how easy is to connect/integrat
 bot.outgoing("save-data", [
     (session, course) => {
         /* set to known if already have one or more interations */
-        session.storage.set("known", true);
+        session.state.known = true;
     }
 ]);
 
@@ -180,7 +195,7 @@ bot.outgoing("save-data", [
 bot.trailing("begin-dialog", [
     (session, course) => {
         /* get known data */
-        const known = session.storage.get("known");
+        const known = session.state.known;
         
         /* if user already interacted, then send a different message to him */
         let greeting = "Hello, nice to meet you! How are you?";
@@ -192,18 +207,41 @@ bot.trailing("begin-dialog", [
 ]);
 ```
 
-The above example show us how we can use the **outgoing layer** to save and retrieve data to manipulate the conversation flow. Every time an user interacts with the chatbot a message will be choose, if the user already interacted, it will send a `Nice to see you again!` message, otherwise a `Hello, nice to meet you!` one. To know if the user already interacted we can set a "known" flag at the end of any **trailing** interaction using `session.storage.set("known", true)`. When the user enters the **trailing** "begin-dialog", we can check if the flag "known" is set to true, than choose the respective message.
+The above example show us how we can use the **outgoing layer** to save and retrieve data to manipulate the conversation flow. Every time an user interacts with the chatbot a message will be choose, if the user already interacted, it will send a `Nice to see you again!` message, otherwise a `Hello, nice to meet you!` one. To know if the user already interacted we can set a "known" flag at the end of any **trailing** interaction using `session.state.known = true`. When the user enters the **trailing** "begin-dialog", we can check if the flag "known" is set to true, than choose the respective message.
 
 ### Course Functions
 
-There are others **course** functions that may be helpful:
+There are others **course** functions that may be helpful, here are all of them:
 ```javascript
-course.begin() /* acts like replace, but it will jump back to the previous dialog when finished (must call course.next() at end) */
-course.skip() /* skip all dialog steps started with course.begin() */
-course.jump(2) /* jump to any step on the current dialog using its index */
-course.mark("this-point") /* mark a step on flow */
-course.hop("that-point") /* hop to a marked step on flow (above) */
-course.back() /* back to the last marked mark */
+course.next() // advance to the next step
+course.begin() // acts like replace, but it will jump back to the previous dialog when finished (must call course.next() at end)
+course.skip() // skip all dialog steps started with course.begin()
+course.jump(2) or course.jump("product_step") // jump to any step on the current dialog using its index or the step name
+course.reset() // jump back to the first step of the dialog, alias for course.jump(0)
+course.again() // repeats the same step
+course.replace() // replace and move to another dialog
+course.end() // reset dialog to the root dialog (starts from begin again)
+```
+
+You can also set the function step as an object, there declaring the name of it. Then you can call `course.jump("STEP_NAME")` and move to it:
+
+```typescript
+bot.trailing("example", [
+    {name: "STEP_NAME", action: (session, course) => {
+        session.state.hey_count += 1;
+        session.send("Hey!");
+        course.next();
+    }},
+    (session, course) => {
+        if (session.state.hey_count < 3) {
+            course.jump("STEP_NAME");
+            return;
+        }
+        course.end();
+    }
+]);
+
+// produces: Hey! Hey! Hey!
 ```
 
 We have some examples on the `examples` folder of this source code.
@@ -214,11 +252,16 @@ Events are custom actions that can be triggered when something happen in the cha
 
 ```javascript
 /* most used events */
-ON_RECEIVE_MESSAGE = "Trigger when chatbot receives a message";
-ON_SEND_MESSAGE = "Trigger when chatbot sends a message";
-ON_CREATE_SESSION = "Trigger when a new session is created";
-ON_DELETE_SESSION = "Trigger when a session is deleted";
-ON_EXPIRE_SESSION = "Trigger when a session is expired (sessions have TTL)";
+ON_RECEIVE_MESSAGE // trigger when chatbot receives a message"
+ON_SEND_MESSAGE // trigger when chatbot sends a message"
+ON_CREATE_SESSION // trigger when a new session is created"
+ON_DELETE_SESSION // trigger when a session is deleted"
+ON_EXPIRE_SESSION // trigger when a session is expired (sessions have TTL)"
+
+/* other events */
+ON_LOCK_SESSION // trigger when a session is locked because of being used
+ON_UNLOCK_SESSION // trigger when a session is unlocked
+ON_REFRESH_SESSION // refresh session expiration date
 ```
 
 It will fire these actions every time an event occur. An example of it:
@@ -338,8 +381,12 @@ So, lets put it all together:
 const {Bot, Message, MessageTypes} = require("bard");
 const express = require("express");
 
+interface State {
+    known: boolean
+}
+
 /* declare the chatbot with a simple conversation flow */
-const bot = new Bot({name: "bot-name"});
+const bot = new Bot<State>({state: {known: false}});
 setupConversationFlow(bot);
 
 /* declare server and webhook that will receive the message from the message broker */
@@ -358,7 +405,7 @@ function setupConversationFlow(bot) {
     bot.outgoing("save-data", [
         (session, course) => {
             /* set to known if already have one or more interations */
-            session.storage.set("known", true);
+            session.state.known = true;
         }
     ]);
 
@@ -366,7 +413,7 @@ function setupConversationFlow(bot) {
     bot.trailing("begin-dialog", [
         (session, course) => {
             /* get known data */
-            const known = session.storage.get("known");
+            const known = session.state.known;
         
             /* if user already interacted, then send a different message to him */
             let greeting = "Hello, nice to meet you! How are you?";
@@ -471,9 +518,9 @@ This is a good way to structure your dialogs, it can be a huge mess, believe me.
 
 We have some examples in this repository too:
 
-- [Simple flow example](/examples/testing)
-- [Dice roller chatbot example](/examples/dice-roller-chatbot)
-- [FAQ chatbot example](/examples/faq-chatbot)
+- [Simple flow example](/examples/testing) *- outdated*
+- [Dice roller chatbot example](/examples/dice-roller-chatbot) - *outdated*
+- [FAQ chatbot example](/examples/faq-chatbot) - *outdated*
 
 ## Considerations
 
