@@ -95,7 +95,7 @@ bot.trailing("greetings", [
             stops flow and wait for the next interation,
             that will be handled by the next step-function
         */
-        session.wait();
+        course.wait();
     },
     (session, course) => {
         /* get user message from session */
