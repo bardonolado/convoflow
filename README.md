@@ -15,7 +15,7 @@
 - [Putting it all together](#putting-it-all-together)
     - [Organizing Dialogs](#organizing-dialogs)
 - [Tutorials](#tutorials)
-- [Examples](#examples)
+- [Examples (*Outdated*)](#examples)
 - [Considerations](#considerations)
 
 ## About it
@@ -514,11 +514,11 @@ This is a good way to structure your dialogs, it can be a huge mess, believe me.
 
 - [FAQ chatbot tutorial](/docs/creating-faq-chatbot.md)
 
-## Examples
+## Examples (*Outdated*)
 
 We have some examples in this repository too:
 
-- [Simple flow example](/examples/testing) *- outdated*
+- [Simple flow example](/examples/testing) - *outdated*
 - [Dice roller chatbot example](/examples/dice-roller-chatbot) - *outdated*
 - [FAQ chatbot example](/examples/faq-chatbot) - *outdated*
 
