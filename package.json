@@ -1,6 +1,6 @@
 {
     "name": "bard-builder",
-    "version": "1.6.3",
+    "version": "1.6.4",
     "description": "chatbot builder framework",
     "main": "./dist/main.js",
     "types": "./dist/main.d.ts",
