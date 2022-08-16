@@ -313,13 +313,13 @@ export default class Course<State> {
 
 		if (step != null) {
 			if (typeof step === "string") {
-				step = this.current_node.chain.findIndex(value => {
+				step = node.chain.findIndex(value => {
 					return isStepFunction(value) ? false : value.name === step;
 				});
 			}
 
-			if (step < 0 || step > this.current_node.chain.length - 1) {
-				logger.log("warning", "[jump] - Step is out of range.");
+			if (step < 0 || step > node.chain.length - 1) {
+				logger.log("warning", "[replace] - Step is out of range.");
 				return false;
 			}
 		}
