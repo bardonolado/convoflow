@@ -16,10 +16,8 @@ export {Message};
 export {Chain, StepFunction};
 export {Session, Course};
 
-export type BotSettings<State> = Optional<Settings<State>, "name">
-
 interface Settings<State> {
-    name: string
+    name?: string
 	state: State
 	log_level?: LogLevel
 }
@@ -27,7 +25,10 @@ interface Settings<State> {
 export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	private static readonly WORKER_DELAY = 250;
 
-	private settings: Settings<State>;
+	private name: string;
+	private state: State;
+	private log_level?: LogLevel;
+
 	private flow: Flow<State>;
 	private sessions: Map<string, Session<State>>;
 	private emitter: Emitter<State>;
@@ -35,11 +36,10 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	private worker: Worker;
 	private status: boolean;
 
-	constructor(settings: BotSettings<State>) {
-		this.settings = {...settings,
-			name: settings.name || `bot-#${uuid()}`,
-			state: settings.state
-		};
+	constructor(settings: Settings<State>) {
+		this.name = settings?.name || `bot-#${uuid()}`;
+		this.state = settings.state || {};
+		this.log_level = settings?.log_level;
 
 		this.sessions = new Map<string, Session<State>>();
 		this.flow = new Flow();
@@ -50,9 +50,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 
 		this.status = false;
 
-		if (this.settings.log_level) {
-			logger.enable(this.settings.log_level);
-		}
+		if (this.log_level) logger.enable(this.log_level);
 	}
 
 	public async start() {
@@ -146,7 +144,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		}
 
 		if (!session) {
-			session = new Session<State>(stamp, this.settings.name, this.settings.state, this.gateway, this.emitter);
+			session = new Session<State>(stamp, this.name, this.state, this.gateway, this.emitter);
 			this.sessions.set(stamp, session);
 
 			session.setContact(message.contact);
