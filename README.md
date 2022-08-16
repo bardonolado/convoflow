@@ -214,12 +214,12 @@ The above example show us how we can use the **outgoing layer** to save and retr
 There are others **course** functions that may be helpful, here are all of them:
 ```javascript
 course.next() // advance to the next step
-course.begin() // acts like replace, but it will jump back to the previous dialog when finished (must call course.next() at end)
+course.begin(dialog) // acts like replace, but it will jump back to the previous dialog when finished (must call course.next() at end)
 course.skip() // skip all dialog steps started with course.begin()
 course.jump(2) or course.jump("product_step") // jump to any step on the current dialog using its index or the step name
 course.reset() // jump back to the first step of the dialog, alias for course.jump(0)
 course.again() // repeats the same step
-course.replace() // replace and move to another dialog
+course.replace(dialog, step?) // replace and move to another dialog
 course.end() // reset dialog to the root dialog (starts from begin again)
 ```
 
