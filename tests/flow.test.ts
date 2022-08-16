@@ -196,8 +196,23 @@ describe("jump action flow", () => {
 			},
 			(session, course) => {
 				console.log("root", "4");
+				course.replace("last", "step-two");
+			},
+		];
+
+		const lastDialog: Chain<ThisState> = [
+			(session, course) => {
+				console.log("last", "1");
 				course.next();
 			},
+			{name: "step-two", action: (session, course) => {
+				console.log("last", "2");
+				course.next();
+			}},
+			(session, course) => {
+				console.log("last", "3");
+				course.end();
+			}
 		];
 	
 		bot = new Bot<ThisState>({state: {count: 0}});
@@ -205,6 +220,7 @@ describe("jump action flow", () => {
 		bot.incoming("incoming", incomingDialog);
 
 		bot.trailing("root", rootDialog);
+		bot.trailing("last", lastDialog);
 
 		await bot.start();
 	});
@@ -225,7 +241,7 @@ describe("jump action flow", () => {
 
 		const expected_calling_order = [
 			"incoming 1", "incoming 2", "incoming 3", "root 1", "root 2", "root 3", "root 2", "root 3",
-			"root 2", "root 3", "root 4"
+			"root 2", "root 3", "root 4", "last 2", "last 3"
 		];
 
 		expect(console.log).toBeCalled();
@@ -239,7 +255,7 @@ describe("jump action flow", () => {
 
 		const expected_calling_order = [
 			"incoming 1", "incoming 2", "incoming 3", "incoming 2", "incoming 3", "root 1", "root 2", "root 3", "root 2", "root 3",
-			"root 2", "root 3", "root 4"
+			"root 2", "root 3", "root 4", "last 2", "last 3"
 		];
 
 		expect(console.log).toBeCalled();
