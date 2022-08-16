@@ -297,7 +297,7 @@ export default class Course<State> {
 		return true;
 	}
 
-	public replace(name: string) {
+	public replace(name: string, step?: number | string) {
 		if (this.lock) {
 			logger.log("warning", "[replace] - Can't run any action in this step anymore.");
 			return false;
@@ -311,8 +311,22 @@ export default class Course<State> {
 			return false;
 		}
 
+		if (step != null) {
+			if (typeof step === "string") {
+				step = this.current_node.chain.findIndex(value => {
+					return isStepFunction(value) ? false : value.name === step;
+				});
+			}
+
+			if (step < 0 || step > this.current_node.chain.length - 1) {
+				logger.log("warning", "[jump] - Step is out of range.");
+				return false;
+			}
+		}
+
+
 		this.current_node = node;
-		this.current_step = 0;
+		this.current_step = step || 0;
 
 		this.detached_progress = [];
 
