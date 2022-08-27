@@ -2,7 +2,7 @@ import Session from "../bot/session";
 import Course from "./course";
 import Node from "./node";
 
-export type StepFunction<State> = (session: Session<State>, course: Course<State>) => (any | Promise<any>);
+export type StepFunction<State> = (session: Session<State>, course: Course) => (any | Promise<any>);
 
 export type WrappedStepFunction<State> = {
 	name: string;
@@ -15,7 +15,7 @@ export function isStepFunction<State>(value: StepFunction<State> | WrappedStepFu
 	return !(<WrappedStepFunction<State>>value).action;
 };
 
-export interface Progress<State> {
-    node: Node<State>
+export interface Progress {
+    node: Node
     step: number
 }

@@ -5,7 +5,7 @@ import logger, {LogLevel} from "../utils/logger";
 import Flow, {FlowTypes} from "../flow/flow";
 import {Chain, StepFunction} from "../flow/definition";
 import Gateway from "../gateway/gateway";
-import Session from "./session";
+import Session, {StorageData} from "./session";
 import Message from "../gateway/message";
 import Course from "../flow/course";
 import Worker from "./worker";
@@ -15,7 +15,7 @@ import SessionManager, {Storage as SessionManagerStorage} from "./session-manage
 export {EmitterEvents as Events};
 export {Message};
 export {Chain, StepFunction};
-export {Session, Course};
+export {Session, StorageData, Course};
 
 interface Settings<State> {
     name?: string
@@ -31,9 +31,9 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	private state: State;
 	private log_level?: LogLevel;
 	
-	private flow: Flow<State>;
-	private session_manager: SessionManager<State>;
-	private emitter: Emitter<State>;
+	private flow: Flow;
+	private session_manager: SessionManager;
+	private emitter: Emitter;
 	private gateway: Gateway;
 	private worker: Worker;
 	private status: boolean;
@@ -88,22 +88,22 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		return this.signature;
 	}
 
-	public incoming(name: string, chain: Chain<State>) {
+	public incoming(name: string, chain: Chain) {
 		if (this.status) throw new Error("Can't insert node after startup");
 		return this.flow.insertNode(name, chain, FlowTypes.INCOMING);
 	}
 
-	public trailing(name: string, chain: Chain<State>) {
+	public trailing(name: string, chain: Chain) {
 		if (this.status) throw new Error("Can't insert node after startup");
 		return this.flow.insertNode(name, chain, FlowTypes.TRAILING);
 	}
 
-	public outgoing(name: string, chain: Chain<State>) {
+	public outgoing(name: string, chain: Chain) {
 		if (this.status) throw new Error("Can't insert node after startup");
 		return this.flow.insertNode(name, chain, FlowTypes.OUTGOING);
 	}
 
-	public event(event: EmitterEvents, action: ActionFunction<State>) {
+	public event(event: EmitterEvents, action: ActionFunction) {
 		if (this.status) throw new Error("Can't insert event after startup");
 		return this.emitter.set(event, action);
 	}
@@ -135,7 +135,9 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		const stamp = message.session;
 		if (!stamp.length) throw new Error("Invalid or missing Message session token");
 
-		let session = await this.session_manager.get(stamp);
+		let session = await vow.handle(this.session_manager.get(stamp));
+		if (session instanceof Error) throw new Error(`Can't get session: '${session.message}'`);
+
 		if (session && session.isActive()) {
 			this.gateway.pushIncoming(message);
 			throw new Error("Session already active");
@@ -145,11 +147,14 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 			this.emitter.execute(EmitterEvents.ON_EXPIRE_SESSION, {session});
 			this.emitter.execute(EmitterEvents.ON_DELETE_SESSION, {session});
 			session = undefined;
-			await this.session_manager.delete(stamp);
+			
+			const deleted = await vow.handle(this.session_manager.delete(stamp));
+			if (deleted instanceof Error) throw new Error(`Can't delete session: '${deleted.message}'`);
 		}
 
 		if (!session) {
-			session = await this.session_manager.set(stamp);
+			session = await vow.handle(this.session_manager.create(stamp));
+			if (session instanceof Error) throw new Error(`Can't create session: '${session.message}'`);
 
 			session.setContact(message.contact);
 			if (message.vendor != null) session.setVendor(message.vendor);
@@ -161,10 +166,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 			const node = nodes.values().next().value;
 			if (!node) throw new Error("Can't get flow node");
 
-			session.setProgress({
-				current: {node: node.name, step: 0},
-				detached: []
-			});
+			session.setProgress({current: {node: node.name, step: 0}, detached: []});
 		}
 
 		session.setMessage(message);
@@ -179,7 +181,8 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		const course = new Course(this.flow, session);
 		await course.run();
 
-		await this.session_manager.sync(stamp);
+		const sync = await vow.handle(this.session_manager.sync(stamp, session));
+		if (sync instanceof Error) throw new Error(`Can't sync session: '${session.message}'`);
 
 		session.setActive(false);
 		this.emitter.execute(EmitterEvents.ON_UNLOCK_SESSION, {session});
@@ -187,7 +190,9 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		if (!session.getStatus()) {
 			this.emitter.execute(EmitterEvents.ON_DELETE_SESSION, {session});
 			session = undefined;
-			await this.session_manager.delete(stamp);
+			
+			const deleted = await vow.handle(this.session_manager.delete(stamp));
+			if (deleted instanceof Error) throw new Error(`Can't delete session: '${deleted.message}'`);
 		}
 
 		return true;
