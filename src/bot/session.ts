@@ -3,6 +3,7 @@ import lodash from "lodash";
 import Message, {createEmptyMessage} from "../gateway/message";
 import Gateway from "../gateway/gateway";
 import Emitter, {EmitterEvents} from "./emitter";
+import {toWatchable} from "../utils/proxy";
 
 export interface Progress {
     node: string
@@ -14,16 +15,22 @@ export interface ProgressData {
     detached: Progress[]
 }
 
+export interface StorageData {
+	progress: ProgressData
+	state: ObjectLiteral
+	timestamp: number
+}
+
 export default class Session<State> {
 	private static readonly EXPIRATION = 16 * 60 * 60;
-	private static readonly MAX_HISTORY_MARKS = 3;
 
 	public state: State;
+	public need_sync: boolean;
 
 	public token: string;
 	public origin: string;
 	public gateway: Gateway;
-	public emitter: Emitter<State>;
+	public emitter: Emitter;
 	public message: Message | null;
 	public contact: string;
 	public vendor: string;
@@ -32,11 +39,14 @@ export default class Session<State> {
 	public progress: ProgressData;
 	public timestamp: number;
 
-	constructor(token: string, origin: string, state: State, gateway: Gateway, emitter: Emitter<State>) {
+	constructor(token: string, origin: string, state: State, gateway: Gateway, emitter: Emitter) {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
-		this.state = lodash.cloneDeep(state);
+		this.state = toWatchable(lodash.cloneDeep(state), {
+			onUpdate: () => this.need_sync = true
+		});
+		this.need_sync = true;
 
 		this.token = token;
 		this.origin = origin;
@@ -80,6 +90,10 @@ export default class Session<State> {
 		return this.vendor;
 	}
 
+	public getStorageData(): StorageData {
+		return {progress: this.progress, state: this.state, timestamp: this.timestamp};
+	}
+
 	public isExpired() {
 		return (Math.floor(+new Date() / 1000) > (this.timestamp + Session.EXPIRATION));
 	}
@@ -121,7 +135,12 @@ export default class Session<State> {
 		}
 
 		this.progress = progress;
+		this.need_sync = true;
 		return null;
+	}
+
+	public setTimestamp(value: number) {
+		return this.timestamp = value;
 	}
 
 	public refresh() {
