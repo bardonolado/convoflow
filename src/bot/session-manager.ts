@@ -4,8 +4,8 @@ import Emitter from "./emitter";
 import vow from "../utils/vow";
 
 export interface Storage {
-    get: (token: string) => Promise<StorageData | undefined>;
-    set: (token: string, data?: StorageData) => Promise<void>;
+    get: (token: string) => Promise<StorageData<ObjectLiteral> | undefined>;
+    set: (token: string, data?: StorageData<ObjectLiteral>) => Promise<void>;
 }
 
 interface Settings {

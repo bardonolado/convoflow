@@ -15,9 +15,9 @@ export interface ProgressData {
     detached: Progress[]
 }
 
-export interface StorageData {
+export interface StorageData<State> {
 	progress: ProgressData
-	state: ObjectLiteral
+	state: State
 	timestamp: number
 }
 
@@ -26,7 +26,7 @@ export default class Session<State> {
 
 	public state: State;
 	public need_sync: boolean;
-
+	
 	public token: string;
 	public origin: string;
 	public gateway: Gateway;
@@ -90,7 +90,7 @@ export default class Session<State> {
 		return this.vendor;
 	}
 
-	public getStorageData(): StorageData {
+	public getStorageData(): StorageData<State> {
 		return {progress: this.progress, state: this.state, timestamp: this.timestamp};
 	}
 
