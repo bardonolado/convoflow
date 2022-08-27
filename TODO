@@ -1,3 +1,4 @@
 [] Change gateway, instead using only queues, use events too;
 [] Update docs;
-[] update docs with external storage
+[] Update docs with external storage;
+[] Add session expiration time in StorageData and to bot settings;
