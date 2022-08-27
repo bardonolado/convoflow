@@ -15,9 +15,9 @@ export interface ProgressData {
     detached: Progress[]
 }
 
-export interface StorageData<State> {
+export interface StorageData {
 	progress: ProgressData
-	state: State
+	state: ObjectLiteral
 	timestamp: number
 }
 
@@ -30,7 +30,7 @@ export default class Session<State> {
 	public token: string;
 	public origin: string;
 	public gateway: Gateway;
-	public emitter: Emitter<State>;
+	public emitter: Emitter;
 	public message: Message | null;
 	public contact: string;
 	public vendor: string;
@@ -39,7 +39,7 @@ export default class Session<State> {
 	public progress: ProgressData;
 	public timestamp: number;
 
-	constructor(token: string, origin: string, state: State, gateway: Gateway, emitter: Emitter<State>) {
+	constructor(token: string, origin: string, state: State, gateway: Gateway, emitter: Emitter) {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
@@ -90,7 +90,7 @@ export default class Session<State> {
 		return this.vendor;
 	}
 
-	public getStorageData(): StorageData<State> {
+	public getStorageData(): StorageData {
 		return {progress: this.progress, state: this.state, timestamp: this.timestamp};
 	}
 

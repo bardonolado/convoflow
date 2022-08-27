@@ -7,21 +7,21 @@ export enum FlowTypes {
     OUTGOING = "outgoing"
 }
 
-export default class Flow<State> {
-	private nodes: Map<FlowTypes, Map<string, Node<State>>>;
+export default class Flow {
+	private nodes: Map<FlowTypes, Map<string, Node>>;
 
 	constructor() {
-		this.nodes = new Map<FlowTypes, Map<string, Node<State>>>();
+		this.nodes = new Map<FlowTypes, Map<string, Node>>();
 		this.setup();
 	}
 
 	private setup() {
 		for (const [item, value] of Object.entries(FlowTypes)) {
-			this.nodes.set(value, new Map<FlowTypes, Node<State>>());
+			this.nodes.set(value, new Map<FlowTypes, Node>());
 		}
 	}
 
-	public getNode(name: string, type: FlowTypes = FlowTypes.TRAILING): (Error | Node<State>) {
+	public getNode(name: string, type: FlowTypes = FlowTypes.TRAILING): (Error | Node) {
 		const nodes = this.nodes.get(type);
 		if (!nodes) return new Error("Can't get any node");
 
@@ -31,13 +31,13 @@ export default class Flow<State> {
 		return new Error("Can't get any node");
 	}
 
-	public getNodes(type: FlowTypes = FlowTypes.TRAILING): (Error | Map<string, Node<State>>) {
+	public getNodes(type: FlowTypes = FlowTypes.TRAILING): (Error | Map<string, Node>) {
 		const nodes = this.nodes.get(type);
 		if (!(nodes && nodes.size)) return new Error("Can't get any nodes");
 		return nodes;
 	}
 
-	public insertNode(name: string, chain: Chain<State>, type: FlowTypes = FlowTypes.TRAILING): (Error | null) {
+	public insertNode(name: string, chain: Chain, type: FlowTypes = FlowTypes.TRAILING): (Error | null) {
 		if (!(this.getNode(name, type) instanceof Error)) {
 			return new Error("Node already exist");
 		}

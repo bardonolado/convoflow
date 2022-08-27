@@ -1,30 +1,30 @@
 import Session, {StorageData} from "./session";
 import Gateway from "../gateway/gateway";
 import Emitter from "./emitter";
+import vow from "../utils/vow";
 
 export interface Storage {
-    get: (token: string) => Promise<StorageData<any>>;
-    set: (token: string, data: StorageData<any>) => Promise<void>;
-    delete: (token: string) => Promise<void>;
+    get: (token: string) => Promise<StorageData | undefined>;
+    set: (token: string, data?: StorageData) => Promise<void>;
 }
 
-interface Settings<State> {
+interface Settings {
     bot_name: string,
-    state: State,
+    state: ObjectLiteral,
     storage?: Storage
 }
 
-class SessionManager<State> {
+class SessionManager {
     public storage?: Storage;
 
     private bot_name: string;
-    private state: State;
-    private emitter: Emitter<State>;
+    private state: ObjectLiteral;
+    private emitter: Emitter;
 	private gateway: Gateway;
 
-    private sessions: Map<string, Session<State>>;
+    private sessions: Map<string, Session<ObjectLiteral>>;
 
-    constructor(settings: Settings<State>, emitter: Emitter<State>, gateway: Gateway) {
+    constructor(settings: Settings, emitter: Emitter, gateway: Gateway) {
         this.storage = settings.storage;
 
         this.bot_name = settings.bot_name;
@@ -32,40 +32,46 @@ class SessionManager<State> {
         this.emitter = emitter;
         this.gateway = gateway;
 
-        this.sessions = new Map<string, Session<State>>();
+        this.sessions = new Map<string, Session<ObjectLiteral>>();
     }
 
     public async get(token: string) {
-        if (this.storage) {
-            const storage_data = await this.storage.get(token);
-            if (storage_data) {
-                const session = new Session<State>(token, this.bot_name, storage_data.state, this.gateway, this.emitter);
-                session.setProgress(storage_data.progress);
-                session.setTimestamp(storage_data.timestamp);
-                return session;
-            }
-        }
-        return this.sessions.get(token);
-    }
+        if (!this.storage) return this.sessions.get(token);
 
-    public async set(token: string, session?: Session<State>) {
-        if (!session) session = new Session<State>(token, this.bot_name, this.state, this.gateway, this.emitter);
-        this.sessions.set(token, session);
+        const result = await vow.handle(this.storage.get(token));
+        if (result instanceof Error) throw new Error(`Storage 'get' error: '${result.message}'`);
+
+        if (!result) return;
+
+        const session = new Session(token, this.bot_name, result.state, this.gateway, this.emitter);
+        session.setProgress(result.progress);
+        session.setTimestamp(result.timestamp);
         return session;
     }
 
-    public async sync(token: string) {
+    public async create(token: string) {
+        const session = new Session(token, this.bot_name, this.state, this.gateway, this.emitter);
+
+        if (!this.storage) this.sessions.set(token, session);
+        return session;
+    }
+
+    public async sync(token: string, session: Session<ObjectLiteral>) {
         if (!this.storage) return;
 
-        const session = this.sessions.get(token);
-        if (!session || !session.need_sync) return;
+        if (!session?.need_sync) return;
 
-        await this.storage.set(token, session.getStorageData());
+        const result = await vow.handle(this.storage.set(token, session.getStorageData()));
+        if (result instanceof Error) throw new Error(`Storage 'sync' error: '${result.message}'`);
+
         session.need_sync = false;
     }
 
     public async delete(token: string) {
-        if (this.storage) await this.storage.delete(token);
+        if (this.storage) {
+            const result = await vow.handle(this.storage.set(token));
+            if (result instanceof Error) throw new Error(`Storage 'delete' error: '${result.message}'`);
+        }
         this.sessions.delete(token);
     }
 }
