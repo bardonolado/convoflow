@@ -6,7 +6,7 @@ export const toWatchable = (target: Record<any, any>, events?: {onRequest?: () =
             if (key === IS_PROXY) return true;
 
             const prop = target[key];
-            if (typeof prop === "undefined") return;
+            if (prop == null) return;
 
             if (!prop[IS_PROXY] && typeof prop === "object") {
                 target[key] = new Proxy(prop, handler);
