@@ -21,7 +21,7 @@ export interface StorageData<State> {
 	timestamp: number
 }
 
-export default class Session<State> {
+export default class Session<State extends ObjectLiteral> {
 	private static readonly EXPIRATION = 16 * 60 * 60;
 
 	public state: State;
@@ -43,7 +43,7 @@ export default class Session<State> {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
-		this.state = toWatchable(lodash.cloneDeep(state), {
+		this.state = toWatchable<State>(lodash.cloneDeep(state), {
 			onUpdate: () => this.need_sync = true
 		});
 		this.need_sync = true;

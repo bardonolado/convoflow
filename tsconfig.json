@@ -14,7 +14,6 @@
         "strictNullChecks": true,
         "baseUrl": ".",
         "esModuleInterop": true,
-        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true
     },
     "exclude": ["node_modules", "dist", "docs", "tests", ".github", "examples"]

@@ -13,7 +13,7 @@ export enum EmitterEvents {
 }
 
 export interface ActionParams {
-    session?: Session<unknown>
+    session?: Session<ObjectLiteral>
     message?: Message
 }
 
