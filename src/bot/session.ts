@@ -19,6 +19,7 @@ export interface StorageData<State> {
 	progress: ProgressData
 	state: State
 	timestamp: number
+	expiration: number
 }
 
 export default class Session<State extends ObjectLiteral> {
@@ -91,7 +92,7 @@ export default class Session<State extends ObjectLiteral> {
 	}
 
 	public getStorageData(): StorageData<State> {
-		return {progress: this.progress, state: this.state, timestamp: this.timestamp};
+		return {progress: this.progress, state: this.state, timestamp: this.timestamp, expiration: Session.EXPIRATION};
 	}
 
 	public isExpired() {
