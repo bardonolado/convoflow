@@ -1,6 +1,6 @@
 const IS_PROXY = Symbol("IS_PROXY");
 
-export const toWatchable = <T extends ObjectLiteral>(target: T, events?: {onRequest?: () => void, onUpdate?: () => void}) => {
+export const toWatchable = <T extends ObjectLiteral>(target: T, events?: {onRequest?: () => void, onUpdate?: () => void}): T => {
     const handler = {
         get(target: any, key: any) {
             if (key === IS_PROXY) return true;
