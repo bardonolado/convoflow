@@ -156,8 +156,6 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 			session = await vow.handle(this.session_manager.create(stamp));
 			if (session instanceof Error) throw new Error(`Can't create session: '${session.message}'`);
 
-			session.setContact(message.contact);
-			if (message.vendor != null) session.setVendor(message.vendor);
 			this.emitter.execute(EmitterEvents.ON_CREATE_SESSION, {session});
 
 			const nodes = this.flow.getNodes();
@@ -168,6 +166,9 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 
 			session.setProgress({current: {node: node.name, step: 0}, detached: []});
 		}
+
+		session.setContact(message.contact);
+		if (message.vendor != null) session.setVendor(message.vendor);
 
 		session.setMessage(message);
 		session.refresh();
