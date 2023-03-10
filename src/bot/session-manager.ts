@@ -36,29 +36,43 @@ class SessionManager {
     }
 
     public async get(token: string) {
-        if (!this.storage) return this.sessions.get(token);
+        let session = this.sessions.get(token);
+        if (!this.storage) return session;
 
         const result = await vow.handle(this.storage.get(token));
         if (result instanceof Error) throw new Error(`Storage 'get' error: '${result.message}'`);
-
         if (!result) return;
 
-        const session = new Session(token, this.bot_name, result.state, this.gateway, this.emitter);
+        if (!session) {
+            session = new Session({token, origin: this.bot_name, state: result.state, gateway: this.gateway, emitter: this.emitter});
+            this.sessions.set(token, session);
+        } else {
+            session.setState(result.state);
+        }
+
         session.setProgress(result.progress);
         session.setTimestamp(result.timestamp);
+
         return session;
     }
 
     public async create(token: string) {
-        const session = new Session(token, this.bot_name, this.state, this.gateway, this.emitter);
+        const session = new Session({token, origin: this.bot_name, state: this.state, gateway: this.gateway, emitter: this.emitter});
+        this.sessions.set(token, session);
 
-        if (!this.storage) this.sessions.set(token, session);
+        if (this.storage) {
+            const result = await vow.handle(this.storage.set(token, session.getStorageData()));
+            if (result instanceof Error) throw new Error(`Storage 'sync' error: '${result.message}'`);
+
+            session.need_sync = false;
+        }
         return session;
     }
 
-    public async sync(token: string, session: Session<ObjectLiteral>) {
+    public async sync(token: string) {
         if (!this.storage) return;
 
+        const session = this.sessions.get(token);
         if (!session?.need_sync) return;
 
         const result = await vow.handle(this.storage.set(token, session.getStorageData()));

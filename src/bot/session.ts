@@ -5,6 +5,14 @@ import Gateway from "../gateway/gateway";
 import Emitter, {EmitterEvents} from "./emitter";
 import {toWatchable} from "../utils/proxy";
 
+export interface SessionProperties<State> {
+	token: string
+	origin: string,
+	state: State
+	gateway: Gateway
+	emitter: Emitter
+}
+
 export interface Progress {
     node: string
     step: number
@@ -40,7 +48,7 @@ export default class Session<State extends ObjectLiteral> {
 	public progress: ProgressData;
 	public timestamp: number;
 
-	constructor(token: string, origin: string, state: State, gateway: Gateway, emitter: Emitter) {
+	constructor({token, origin, state, gateway, emitter}: SessionProperties<State>) {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
@@ -142,6 +150,12 @@ export default class Session<State extends ObjectLiteral> {
 
 	public setTimestamp(value: number) {
 		return this.timestamp = value;
+	}
+
+	public setState(value: State) {
+		this.state = toWatchable<State>(lodash.cloneDeep(value), {
+			onUpdate: () => this.need_sync = true
+		});
 	}
 
 	public refresh() {

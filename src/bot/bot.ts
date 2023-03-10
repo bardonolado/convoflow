@@ -138,12 +138,12 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		let session = await vow.handle(this.session_manager.get(stamp));
 		if (session instanceof Error) throw new Error(`Can't get session: '${session.message}'`);
 
-		if (session && session.isActive()) {
+		if (session?.isActive()) {
 			this.gateway.pushIncoming(message);
 			throw new Error("Session already active");
 		}
 
-		if (session && session.isExpired()) {
+		if (session?.isExpired()) {
 			this.emitter.execute(EmitterEvents.ON_EXPIRE_SESSION, {session});
 			this.emitter.execute(EmitterEvents.ON_DELETE_SESSION, {session});
 			session = undefined;
@@ -182,7 +182,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		const course = new Course(this.flow, session);
 		await course.run();
 
-		const sync = await vow.handle(this.session_manager.sync(stamp, session));
+		const sync = await vow.handle(this.session_manager.sync(stamp));
 		if (sync instanceof Error) throw new Error(`Can't sync session: '${session.message}'`);
 
 		session.setActive(false);
