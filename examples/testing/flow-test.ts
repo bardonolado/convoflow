@@ -35,7 +35,7 @@ const beginDialog: Chain<State> = [
 ];
 
 const main = async function() {
-	const bot = new Bot<State>({name: "simple-bot"});
+	const bot = new Bot<State>({});
 
 	bot.trailing("root", rootDialog);
 	bot.trailing("begin", beginDialog);
@@ -46,7 +46,7 @@ const main = async function() {
 	const session_token = "dk2#9jkd__392jd";
 	const origin = "test-file";
 
-	bot.push(new Message("my-contact", session_token, origin, "hello"));
+	bot.push(new Message({contact: "my-contact", session: session_token, origin, data: "hello"}));
 }
 
 main();

@@ -164,9 +164,7 @@ export default class Session<State extends ObjectLiteral> {
 
 	public async send(data: any) {
 		if (data == null) throw new Error("Data can't be null");
-		const message = new Message(
-			this.contact, this.token, this.origin, data
-		);
+		const message = new Message({contact: this.contact, session: this.token, origin: this.origin, data});
 		if (this.vendor != "") message.vendor = this.vendor;
 
 		if (this.gateway.pushOutgoing(message) instanceof Error) {

@@ -129,10 +129,10 @@ describe("basic flow", () => {
 	const origin = "test";
 
 	it("should replace in the second message to the redirect dialog and start begin dialog from there", async() => {
-		bot.push(new Message(contact, session_token, origin, "message"));
-		bot.push(new Message(contact, session_token, origin, "redirect-message"));
-		bot.push(new Message(contact, session_token, origin, "message"));
-		bot.push(new Message(contact, session_token, origin, "message"));
+		bot.push(new Message({contact, session: session_token, origin, data: "message"}));
+		bot.push(new Message({contact, session: session_token, origin, data: "redirect-message"}));
+		bot.push(new Message({contact, session: session_token, origin, data: "message"}));
+		bot.push(new Message({contact, session: session_token, origin, data: "message"}));
 
 		await waitForMessages();
 
@@ -235,7 +235,7 @@ describe("jump action flow", () => {
 	const origin = "test";
 
 	it("should loop to step-to until check if pass", async() => {
-		bot.push(new Message(contact, session_token, origin, "message"));
+		bot.push(new Message({contact, session: session_token, origin, data: "message"}));
 
 		await waitForMessages();
 
@@ -249,7 +249,7 @@ describe("jump action flow", () => {
 	});
 
 	it("should jump one time in incoming trailing", async() => {
-		bot.push(new Message(contact, session_token, origin, "jump incoming"));
+		bot.push(new Message({contact, session: session_token, origin, data: "jump incoming"}));
 
 		await waitForMessages();
 
@@ -335,7 +335,7 @@ describe("skip action flow", () => {
 	const origin = "test";
 
 	it("should skip first and begin dialog", async() => {
-		bot.push(new Message(contact, session_token, origin, "message"));
+		bot.push(new Message({contact, session: session_token, origin, data: "message"}));
 
 		await waitForMessages();
 
@@ -348,7 +348,7 @@ describe("skip action flow", () => {
 	});
 
 	it("should skip incoming dialog", async() => {
-		bot.push(new Message(contact, session_token, origin, "skip"));
+		bot.push(new Message({contact, session: session_token, origin, data: "skip"}));
 
 		await waitForMessages();
 

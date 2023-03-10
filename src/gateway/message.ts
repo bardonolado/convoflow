@@ -1,5 +1,13 @@
 import {v4 as uuid} from "uuid";
 
+export interface MessageProperties {
+	contact: string
+	session: string
+	origin: string
+	data: any
+	creation?: Date
+}
+
 export interface MessageStructure {
     token: string
     session: string
@@ -21,7 +29,7 @@ export default class Message implements MessageStructure {
 	public creation: Date;
 	public extra?: any;
 
-	constructor(contact: string, session: string, origin: string, data: any, creation?: Date) {
+	constructor({contact, session, origin, data, creation}: MessageProperties) {
 		this.token = uuid();
 		this.contact = contact;
 		this.session = session;
@@ -41,5 +49,5 @@ export default class Message implements MessageStructure {
 }
 
 export function createEmptyMessage() {
-	return new Message("", "", "", "");
+	return new Message({contact: "", session: "", origin: "", data: ""});
 }

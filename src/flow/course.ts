@@ -1,4 +1,4 @@
-import Session from "../bot/session";
+import Session from "../builder/session";
 import {isStepFunction, Progress} from "./definition";
 import Flow, {FlowTypes} from "./flow";
 import Node from "./node";

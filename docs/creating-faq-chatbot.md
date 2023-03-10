@@ -308,10 +308,10 @@ module.exports = class Gateway {
         /* declare endpoit for receiving messages */
         this.server.post("/receive/message", (request, response) => {
             const body = request.body;
-            const message = new Message(
-                body.contact, body.session, body.origin,
-                body.data, MessageTypes.TEXT
-            );
+            const message = new Message({
+                contact: body.contact, session: body.session, origin: body.origin,
+                data: body.data
+            });
 
             /* use bot.push(message_object) to send a message to the conversation flow */
             this.bot.push(message);

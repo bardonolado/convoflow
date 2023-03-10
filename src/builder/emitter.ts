@@ -1,4 +1,4 @@
-import Session from "../bot/session";
+import Session from "../builder/session";
 import Message from "../gateway/message";
 
 export enum EmitterEvents {

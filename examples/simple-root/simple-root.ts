@@ -126,9 +126,9 @@ const main = async function() {
 	const session_token = "dk2#9jkd__392jd";
 	const origin = "test-file";
 
-	bot.push(new Message("my-contact", session_token, origin, "hello"));
-	bot.push(new Message("my-contact", session_token, origin, "good"));
-	bot.push(new Message("my-contact", session_token, origin, "hello again"));
+	bot.push(new Message({contact: "my-contact", session: session_token, origin, data: "hello"}));
+	bot.push(new Message({contact: "my-contact", session: session_token, origin, data: "good"}));
+	bot.push(new Message({contact: "my-contact", session: session_token, origin, data: "hello again"}));
 }
 
 main();

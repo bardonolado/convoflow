@@ -9,7 +9,7 @@ export interface Storage {
 }
 
 interface Settings {
-    bot_name: string,
+    builder_name: string,
     state: ObjectLiteral,
     storage?: Storage
 }
@@ -17,7 +17,7 @@ interface Settings {
 class SessionManager {
     public storage?: Storage;
 
-    private bot_name: string;
+    private builder_name: string;
     private state: ObjectLiteral;
     private emitter: Emitter;
 	private gateway: Gateway;
@@ -27,7 +27,7 @@ class SessionManager {
     constructor(settings: Settings, emitter: Emitter, gateway: Gateway) {
         this.storage = settings.storage;
 
-        this.bot_name = settings.bot_name;
+        this.builder_name = settings.builder_name;
         this.state = settings.state;
         this.emitter = emitter;
         this.gateway = gateway;
@@ -44,7 +44,7 @@ class SessionManager {
         if (!result) return;
 
         if (!session) {
-            session = new Session({token, origin: this.bot_name, state: result.state, gateway: this.gateway, emitter: this.emitter});
+            session = new Session({token, origin: this.builder_name, state: result.state, gateway: this.gateway, emitter: this.emitter});
             this.sessions.set(token, session);
         } else {
             session.setState(result.state);
@@ -57,7 +57,7 @@ class SessionManager {
     }
 
     public async create(token: string) {
-        const session = new Session({token, origin: this.bot_name, state: this.state, gateway: this.gateway, emitter: this.emitter});
+        const session = new Session({token, origin: this.builder_name, state: this.state, gateway: this.gateway, emitter: this.emitter});
         this.sessions.set(token, session);
 
         if (this.storage) {

@@ -1,4 +1,4 @@
-import Session from "../bot/session";
+import Session from "../builder/session";
 import Course from "./course";
 import Node from "./node";
 

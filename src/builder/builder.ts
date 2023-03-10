@@ -24,7 +24,7 @@ interface Settings<State> {
 	session_storage?: SessionManagerStorage
 }
 
-export class Bot<State extends ObjectLiteral = ObjectLiteral> {
+export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 	private static readonly WORKER_DELAY = 250;
 
 	private name: string;
@@ -39,7 +39,7 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 	private status: boolean;
 
 	constructor(settings: Settings<State>) {
-		this.name = settings?.name || `bot-#${uuid()}`;
+		this.name = settings?.name || `builder-#${uuid()}`;
 		this.state = settings.state || {};
 		this.log_level = settings?.log_level;
 
@@ -47,11 +47,11 @@ export class Bot<State extends ObjectLiteral = ObjectLiteral> {
 		this.emitter = new Emitter();
 		this.gateway = new Gateway();
 		this.session_manager = new SessionManager(
-			{storage: settings?.session_storage, bot_name: this.name, state: this.state},
+			{storage: settings?.session_storage, builder_name: this.name, state: this.state},
 			this.emitter, this.gateway
 		);
 
-		this.worker = new Worker(() => this.consume(), {delay: Bot.WORKER_DELAY});
+		this.worker = new Worker(() => this.consume(), {delay: Builder.WORKER_DELAY});
 
 		this.status = false;
 

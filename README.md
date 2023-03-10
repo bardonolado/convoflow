@@ -289,10 +289,10 @@ To insert a **outgoing message** you must to instantiate a message object first.
 ```typescript
 const {Message} = require("bard-builder");
 
-const message = new Message(
-    "user-contact", "user-session", "message-broker-origin",
-    "message-data"
-);
+const message = new Message({
+    contact: "user-contact", session: "user-session", origin: "message-broker-origin",
+    data: "message-data"
+});
 
 ...
 
@@ -317,7 +317,7 @@ server.use(express.json());
 server.post("/receive/message", (request, response) => {
     const body = request.body;
     /* use bot.push(message_object) to send a message to the conversation flow */
-    bot.push(new Message(body.contact, body.session, body.origin, body.data));
+    bot.push(new Message({contact: body.contact, session: body.session, origin: body.origin, data: body.data}));
     return response.status(200).send("OK");
 });
 
@@ -435,7 +435,7 @@ function setupServer(server) {
     server.post("/receive/message", (request, response) => {
         const body = request.body;
         /* use bot.push(message_object) to send a message to the conversation flow */
-        bot.push(new Message(body.contact, body.session, body.origin, body.data));
+        bot.push(new Message({contact: body.contact, session: body.session, origin: body.origin, data: body.data}));
         return response.status(200).send("OK");
     });
     server.listen(8888);
