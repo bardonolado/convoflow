@@ -1,4 +1,4 @@
-# ConvoFlow
+# Convo Flow
 
 - [About it](#about-it)
 - [Introduction to ConvoFlow](#convoflow)
