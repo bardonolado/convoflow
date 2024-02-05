@@ -2,9 +2,9 @@
 
 ## Introduction
 
-A FAQ Chatbot have the purpose of answering the most common questions asked by users. We will build one using [Bard](/docs/how-to-create-a-chatbot) and some of its funtionalities, that will help us to build a smarter chatbot.
+A FAQ Chatbot have the purpose of answering the most common questions asked by users. We will build one using [ConverFlow](/docs/how-to-create-a-chatbot) and some of its funtionalities, that will help us to build a smarter chatbot.
 
-[Bard](/docs/how-to-create-a-chatbot) is a chatbot builder framework written in NodeJS/Typescript, but you can use it on your NodeJS/Javascript project too.
+[ConverFlow](/docs/how-to-create-a-chatbot) is a chatbot builder framework written in NodeJS/Typescript, but you can use it on your NodeJS/Javascript project too.
 
 ## Conversation Flow
 
@@ -24,15 +24,15 @@ First of all, we need to setup our project:
 
 ```bash
 npm init
-npm i --save bard-builder express
+npm i --save converflow express
 ```
 
-Now we must import [Bard](https://www.npmjs.com/package/bard-builder) and declare our chatbot.
+Now we must import [ConverFlow](https://www.npmjs.com/package/converflow) and declare our chatbot.
 
 Let's create a file named `main.js`:
 
 ```javascript
-const {Bot} = require("bard-builder");
+const {Bot} = require("converflow");
 
 const main = function() {
     /* declare the chatbot instance */
@@ -94,7 +94,7 @@ module.exports = function(bot) {
 And we need to modify our `main function` inside the `main.js` file to setup the flow:
 
 ```javascript
-const {Bot} = require("bard-builder");
+const {Bot} = require("converflow");
 
 const main = function() {
     /* declare and setup the chatbot instance */
@@ -286,7 +286,7 @@ To send a reply for the messages sent by the **conversation flow**, in response 
 So, we are creating a webhook for receiving the messages and a pulling system to send the messages out to the message broker (your broker) - you can substitute that. We need put the code above inside the previous created `gateway.js` file:
 
 ```javascript
-const {Message, MessageTypes} = require("bard-builder");
+const {Message, MessageTypes} = require("converflow");
 const express = require("express");
 
 module.exports = class Gateway {
@@ -348,7 +348,7 @@ We are declaring our **message broker** and creating a function that calls itsel
 And to add this to the chatbot system we must modify our `main.js` file again:
 
 ```javascript
-const {Bot} = require("bard-builder");
+const {Bot} = require("converflow");
 const setup_flow = require("./flow.js");
 const Gateway = require("./gateway.js");
 

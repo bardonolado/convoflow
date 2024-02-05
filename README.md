@@ -1,7 +1,7 @@
-# Bard
+# ConverFlow
 
 - [About it](#about-it)
-- [Introduction to Bard](#bard)
+- [Introduction to ConverFlow](#converflow)
 - [Declaring a Chatbot](#chatbot)
 - [Conversation Flow](#conversation-flow)
     - [Trailing Layer](#trailing-layer)
@@ -29,13 +29,13 @@ Some of them had graphical interfaces, others don't, just plain code. I had more
 
 I came up with some concepts to try to solve that, polished the best I could. The result was a simple framework that allow you to create a conversation flow (chatbot) and link it to any message broker that you wish to.
 
-## Bard
+## ConverFlow
 
 It is a chatbot framework that allows you to create your own chatbot and link it to any message broker. It is completely written in NodeJS/Typescript, but you can import it to your NodeJS/Javascript code too.
 
 You can easily install it on your NodeJS project using NPM:
 ```bash
-npm i --save bard-builder
+npm i --save converflow
 ```
 
 Basically it is composed of two sections, the **conversation flow** and the **message gateway**.
@@ -44,10 +44,10 @@ Using its components, you can easily create a **conversation flow** that are int
 
 ## Chatbot
 
-It is simple to create, just import the bard module and create a Bot instance:
+It is simple to create, just import the converflow module and create a Bot instance:
 
 ```typescript
-import {Bot} from "bard-builder";
+import {Bot} from "converflow";
 const bot = new Bot({state: {}});
 
 /* to start both conversation flow and message gateway */
@@ -57,13 +57,13 @@ bot.start();
 Or using `require`/`module.exports` (vannila js):
 
 ```javascript
-const bard = require("bard-builder");
-const bot = new bard.Bot({state: {}});
+const converflow = require("converflow");
+const bot = new converflow.Bot({state: {}});
 
 bot.start();
 ```
 
-==Remeber to use the `bard.` prefix when not using ES6 modules import==
+==Remeber to use the `converflow.` prefix when not using ES6 modules import==
 
 After you instantiate your chatbot, you can start creating the conversation flow.
 
@@ -267,7 +267,7 @@ ON_REFRESH_SESSION // refresh session expiration date
 It will fire these actions every time an event occur. An example of it:
 
 ```typescript
-const {Events} = require("bard-builder");
+const {Events} = require("converflow");
 
 bot.event(Events.ON_RECEIVE_MESSAGE, (params) => {
     console.log(`Incoming message ${params.message?.data}.`);
@@ -287,7 +287,7 @@ It is a mediator (not the pattern) between your **message broker** and the **con
 To insert a **outgoing message** you must to instantiate a message object first. You can use the `Message` class to do it:
 
 ```typescript
-const {Message} = require("bard-builder");
+const {Message} = require("converflow");
 
 const message = new Message({
     contact: "user-contact", session: "user-session", origin: "message-broker-origin",
@@ -303,7 +303,7 @@ bot.push(message);
 You probably are receiving from **message broker** by a **webhook**, so we will need to create one (you can use other frameworks, but to simplify we will just use `"express"`, that is a excellent a reliable framework).
 
 ```typescript
-const {Bot, Message} = require("bard-builder");
+const {Bot, Message} = require("converflow");
 const express = require("express");
 
 const bot = new Bot({name: "bot-name"});
@@ -335,7 +335,7 @@ Every time it happens a new interaction is executed in the **conversation flow**
 To send a reply for the messages sent by the **conversation flow**, in response to the ones received, we can use `bot.pull()` function. It will pull a **outgoing message** from the **conversation flow**. We can do it by creating a pulling system and sending all **outgoing messages** to our **message broker**:
 
 ```typescript
-const {Bot} = require("bard-builder");
+const {Bot} = require("converflow");
 const MyBroker = require("my-broker");
 
 const bot = new Bot({name: "bot-name"});
@@ -378,7 +378,7 @@ Basically, to create our chatbot we will need to:
 So, lets put it all together:
 
 ```javascript
-const {Bot, Message} = require("bard");
+const {Bot, Message} = require("converflow");
 const express = require("express");
 
 interface State {
@@ -524,8 +524,8 @@ We have some examples in this repository too:
 
 ## Considerations
 
-I really worked on this project, tried to solve this problem for me. Found myself writing with more quality while using **Bard**. It really changed the way I developed/structured my chatbots. I hope that it will help you too.
+I really worked on this project, tried to solve this problem for me. Found myself writing with more quality while using **Converflow**. It really changed the way I developed/structured my chatbots. I hope that it will help you too.
 
-Bard is under [GNU GPLv3](/LICENSE) license.
+Converflow is under [GNU GPLv3](/LICENSE) license.
 
 Author: Arnaldo Badin

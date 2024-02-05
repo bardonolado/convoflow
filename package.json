@@ -1,5 +1,5 @@
 {
-    "name": "bard-builder",
+    "name": "converflow",
     "version": "1.7.1",
     "description": "chatbot builder framework",
     "main": "./dist/main.js",
@@ -14,14 +14,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/arnaldobadin/bard"
+        "url": "git+https://github.com/arnaldobadin/converflow"
     },
     "author": "Arnaldo Badin",
     "license": "GPLv3",
     "bugs": {
-        "url": "https://github.com/arnaldobadin/bard/issues"
+        "url": "https://github.com/arnaldobadin/converflow/issues"
     },
-    "homepage": "github.com/arnaldobadin/bard",
+    "homepage": "github.com/arnaldobadin/converflow",
     "dependencies": {
         "@types/lodash": "^4.14.182",
         "@types/node": "^14.0.14",

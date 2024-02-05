@@ -1,4 +1,4 @@
-const {Message, MessageTypes} = require("bard-builder");
+const {Message, MessageTypes} = require("converflow");
 const express = require("express");
 
 module.exports = class Gateway {

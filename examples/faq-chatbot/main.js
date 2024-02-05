@@ -1,4 +1,4 @@
-const {Bot} = require("bard-builder");
+const {Bot} = require("converflow");
 const setup_flow = require("./flow.js");
 const Gateway = require("./gateway.js");
 
