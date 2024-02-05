@@ -2,7 +2,7 @@ Convo Flow
 
 Example:
 
-```json
+```typescript
 import {Builder, Events, Message} from "convoflow";
 
 const main = async function () {
