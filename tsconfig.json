@@ -16,5 +16,5 @@
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true
     },
-    "exclude": ["node_modules", "dist", "docs", "tests", ".github", "examples"]
+    "exclude": ["node_modules", "dist", "docs", "tests", ".github", "examples", "outdated", "old"]
 }
