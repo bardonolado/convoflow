@@ -1,16 +1,12 @@
 import lodash from "lodash";
 
 import Message, {createEmptyMessage} from "../gateway/message";
-import Gateway from "../gateway/gateway";
-import Emitter, {EmitterEvents} from "./emitter";
 import {toWatchable} from "../utils/proxy";
 
 export interface SessionProperties<State> {
 	token: string
 	origin: string,
 	state: State
-	gateway: Gateway
-	emitter: Emitter
 }
 
 export interface Progress {
@@ -38,8 +34,6 @@ export default class Session<State extends ObjectLiteral> {
 	
 	public token: string;
 	public origin: string;
-	public gateway: Gateway;
-	public emitter: Emitter;
 	public message: Message | null;
 	public contact: string;
 	public vendor: string;
@@ -47,8 +41,9 @@ export default class Session<State extends ObjectLiteral> {
 	public status: boolean;
 	public progress: ProgressData;
 	public timestamp: number;
+	public conversation_actions: (() => Promise<Message | null>)[];
 
-	constructor({token, origin, state, gateway, emitter}: SessionProperties<State>) {
+	constructor({token, origin, state}: SessionProperties<State>) {
 		if (!token.length) throw new Error("Invalid or missing token string");
 		if (!origin.length) throw new Error("Invalid or missing origin string");
 
@@ -60,9 +55,6 @@ export default class Session<State extends ObjectLiteral> {
 		this.token = token;
 		this.origin = origin;
 
-		this.gateway = gateway;
-		this.emitter = emitter;
-
 		this.message = null;
 		this.contact = "";
 		this.vendor = "";
@@ -73,6 +65,8 @@ export default class Session<State extends ObjectLiteral> {
 		this.progress = {current: {node: "", step: 0}, detached: []};
 
 		this.timestamp = Math.floor(+new Date() / 1000);
+
+		this.conversation_actions = [];
 	}
 
 	public isActive() {
@@ -162,20 +156,25 @@ export default class Session<State extends ObjectLiteral> {
 		return this.timestamp = Math.floor(+new Date() / 1000);
 	}
 
-	public async send(data: any) {
+	public send(data: any) {
 		if (data == null) throw new Error("Data can't be null");
 		const message = new Message({contact: this.contact, session: this.token, origin: this.origin, data});
 		if (this.vendor != "") message.vendor = this.vendor;
 
-		if (this.gateway.pushOutgoing(message) instanceof Error) {
-			throw new Error("Can't push message to dispacther");
-		}
+		this.conversation_actions.push(async () => message);
 
-		this.emitter.execute(EmitterEvents.ON_SEND_MESSAGE, {session: this, message});
 		return "Message sent with success";
+	}
+
+	public stall(milliseconds: number) {
+		milliseconds = Math.max(0, milliseconds);
+
+		this.conversation_actions.push(() => new Promise((resolve) => {
+			setTimeout(() => resolve(null), milliseconds);
+		}));
 	}
 
 	public end() {
 		return this.status = false;
-	}
+	}	
 }

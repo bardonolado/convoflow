@@ -4,11 +4,11 @@ import vow from "../utils/vow";
 export type OperationFunction = (...args: any[]) => Promise<any>;
 
 export interface WorkerSettings {
-    delay?: number
+    rest_time?: number
 }
 
 export default class Worker {
-	private static readonly DELAY = 250;
+	private static readonly DEFAULT_REST_TIME = 250;
 
 	private operation: OperationFunction;
 	private settings: WorkerSettings;
@@ -38,7 +38,7 @@ export default class Worker {
 
 		const result = await vow.handle(this.operation(this.token));
 		if (result instanceof Error) {
-			return setTimeout(() => this.run(), this.settings?.delay || Worker.DELAY);
+			return setTimeout(() => this.run(), this.settings?.rest_time || Worker.DEFAULT_REST_TIME);
 		}
 
 		return setImmediate(() => this.run());

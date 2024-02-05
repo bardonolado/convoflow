@@ -171,6 +171,7 @@ export default class Course {
 		});
 	}
 
+	// jumps to next step
 	public next() {
 		if (this.lock) {
 			logger.log("warning", "[next] - Can't run any action in this step anymore.");
@@ -188,6 +189,7 @@ export default class Course {
 		return true;
 	}
 
+	// wait for input in the current step
 	public wait() {
 		if (this.lock) {
 			logger.log("warning", "[wait] - Can't run any action in this step anymore.");
@@ -200,6 +202,7 @@ export default class Course {
 		return true;
 	}
 
+	// jump to a determined step in a dialog block, either by name or index
 	public jump(step: number | string) {
 		if (this.lock) {
 			logger.log("warning", "[jump] - Can't run any action in this step anymore.");
@@ -224,6 +227,7 @@ export default class Course {
 		return true;
 	}
 
+	// skip current step
 	public skip() {
 		if (this.lock) {
 			logger.log("warning", "[skip] - Can't run any action in this step anymore.");
@@ -238,6 +242,7 @@ export default class Course {
 		return true;
 	}
 
+	// play current step again
 	public again() {
 		if (this.lock) {
 			logger.log("warning", "[again] - Can't run any action in this step anymore.");
@@ -250,6 +255,7 @@ export default class Course {
 		return true;
 	}
 
+	// reset dialog to first step
 	public reset() {
 		if (this.lock) {
 			logger.log("warning", "[reset] - Can't run any action in this step anymore.");
@@ -263,6 +269,7 @@ export default class Course {
 		return true;
 	}
 
+	// start a detached dialog and after it finishes will resume current step + 1
 	public begin(name: string) {
 		if (this.lock) {
 			logger.log("warning", "[begin] - Can't run any action in this step anymore.");
@@ -297,6 +304,7 @@ export default class Course {
 		return true;
 	}
 
+	// change dialog, can specify which step want to start
 	public replace(name: string, step?: number | string) {
 		if (this.lock) {
 			logger.log("warning", "[replace] - Can't run any action in this step anymore.");
@@ -338,6 +346,7 @@ export default class Course {
 		return true;
 	}
 
+	// finishes dialog
 	public end() {
 		if (this.lock) {
 			logger.log("warning", "[end] - Can't run any action in this step anymore.");

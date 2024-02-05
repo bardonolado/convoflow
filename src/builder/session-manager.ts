@@ -44,7 +44,7 @@ class SessionManager {
         if (!result) return;
 
         if (!session) {
-            session = new Session({token, origin: this.builder_name, state: result.state, gateway: this.gateway, emitter: this.emitter});
+            session = new Session({token, origin: this.builder_name, state: result.state});
             this.sessions.set(token, session);
         } else {
             session.setState(result.state);
@@ -57,7 +57,7 @@ class SessionManager {
     }
 
     public async create(token: string) {
-        const session = new Session({token, origin: this.builder_name, state: this.state, gateway: this.gateway, emitter: this.emitter});
+        const session = new Session({token, origin: this.builder_name, state: this.state});
         this.sessions.set(token, session);
 
         if (this.storage) {

@@ -1,4 +1,4 @@
-import {Bot, Message, Chain} from "../main";
+import {Builder, Message, Chain} from "../main";
 
 type State = Record<string, any>;
 
@@ -37,7 +37,7 @@ const waitForMessages = () => {
 };
 
 describe("basic flow", () => {
-	let bot: Bot<State>;
+	let bot: Builder<State>;
 
 	beforeEach(async () => {
 		const incomingDialog: Chain<State> = [
@@ -107,7 +107,7 @@ describe("basic flow", () => {
 			}
 		];
 	
-		bot = new Bot({name: "simple-bot", state: {}})
+		bot = new Builder({name: "simple-bot", state: {}})
 
 		bot.incoming("incoming", incomingDialog);
 	
@@ -149,8 +149,11 @@ describe("basic flow", () => {
 });
 
 describe("jump action flow", () => {
-	type ThisState = {count: number};
-	let bot: Bot<ThisState>;
+	interface ThisState {
+		count: number
+	};
+	
+	let bot: Builder<ThisState>;
 
 	beforeEach(async () => {
 		const incomingDialog: Chain<ThisState> = [
@@ -215,7 +218,7 @@ describe("jump action flow", () => {
 			}
 		];
 	
-		bot = new Bot<ThisState>({state: {count: 0}});
+		bot = new Builder<ThisState>({state: {count: 0}});
 
 		bot.incoming("incoming", incomingDialog);
 
@@ -264,7 +267,7 @@ describe("jump action flow", () => {
 });
 
 describe("skip action flow", () => {
-	let bot: Bot;
+	let bot: Builder;
 
 	beforeEach(async () => {
 		const incomingDialog: Chain = [
@@ -314,7 +317,7 @@ describe("skip action flow", () => {
 			}
 		];
 	
-		bot = new Bot({state: {}});
+		bot = new Builder({state: {}});
 
 		bot.incoming("incoming", incomingDialog);
 

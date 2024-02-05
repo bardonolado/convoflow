@@ -18,18 +18,22 @@ export {Chain, StepFunction};
 export {Session, StorageData, Course};
 
 interface Settings<State> {
+	id?: string
     name?: string
 	state: State
 	log_level?: LogLevel
 	session_storage?: SessionManagerStorage
+	onSendMessage?: (message: Message) => Promise<void> | void
 }
 
 export class Builder<State extends ObjectLiteral = ObjectLiteral> {
-	private static readonly WORKER_DELAY = 250;
+	private static readonly WORKER_REST_TIME = 250;
 
+	private id: string;
 	private name: string;
 	private state: State;
 	private log_level?: LogLevel;
+	private onSendMessage?: (message: Message) => void;
 	
 	private flow: Flow;
 	private session_manager: SessionManager;
@@ -39,19 +43,21 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 	private status: boolean;
 
 	constructor(settings: Settings<State>) {
-		this.name = settings?.name || `builder-#${uuid()}`;
+		this.id = settings?.id || uuid();
+		this.name = settings?.name || `builder-#${this.id}`;
 		this.state = settings.state || {};
 		this.log_level = settings?.log_level;
+		this.onSendMessage = settings?.onSendMessage;
 
 		this.flow = new Flow();
 		this.emitter = new Emitter();
-		this.gateway = new Gateway();
+		this.gateway = new Gateway({onPushOutgoing: this.onSendMessage});
 		this.session_manager = new SessionManager(
 			{storage: settings?.session_storage, builder_name: this.name, state: this.state},
 			this.emitter, this.gateway
 		);
 
-		this.worker = new Worker(() => this.consume(), {delay: Builder.WORKER_DELAY});
+		this.worker = new Worker(() => this.consume(), {rest_time: Builder.WORKER_REST_TIME});
 
 		this.status = false;
 
@@ -115,6 +121,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 
 	public pull(): (Message | Error) {
 		if (!this.status) throw new Error("Can't insert event before startup");
+		if (this.onSendMessage) throw new Error("Can't pull message while using 'onSendMessage' option")
 		return this.gateway.pullOutgoing();
 	}
 
@@ -139,7 +146,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		if (session instanceof Error) throw new Error(`Can't get session: '${session.message}'`);
 
 		if (session?.isActive()) {
-			this.gateway.pushIncoming(message);
+			this.gateway.pushIncoming(message, {beggining: true});
 			throw new Error("Session already active");
 		}
 
@@ -181,6 +188,23 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 
 		const course = new Course(this.flow, session);
 		await course.run();
+
+		// resolve conversation actions for session
+		for (const action of session.conversation_actions) {
+			const message = await action();
+			if (!message) continue;
+
+			// it's wrapped around self called function because of unhandled promises errors
+			(async () => {
+				try {
+					await this.gateway.pushOutgoing(message);
+				} catch (error) {
+					logger.log("error", `Error on sending message: '${(error as Error)?.message}'`);
+				}
+			})();
+
+			this.emitter.execute(EmitterEvents.ON_SEND_MESSAGE, {session, message});
+		}
 
 		const sync = await vow.handle(this.session_manager.sync(stamp));
 		if (sync instanceof Error) throw new Error(`Can't sync session: '${session.message}'`);

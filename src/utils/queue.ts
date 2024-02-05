@@ -18,7 +18,7 @@ export default class Queue<T> {
 		this.size = 0;
 	}
 
-	public push(value: T): (Error | null) {
+	public push(value: T): null {
 		const node: Node<T> = {value, next: null};
 
 		if (!this.size) {
@@ -54,6 +54,22 @@ export default class Queue<T> {
 		this.size--;
 
 		return node.value;
+	}
+
+	public unshift(value: T): Error | null {
+		const node: Node<T> = { value, next: null };
+	
+		if (!this.size) {
+			this.head = node;
+			this.tail = node;
+			this.size++;
+			return null;
+		}
+	
+		node.next = this.head;
+		this.head = node;
+		this.size++;
+		return null;
 	}
 
 	public find(operator: ComparationFunction<T>): (T | Error) {
