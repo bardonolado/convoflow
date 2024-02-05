@@ -1,3 +1,4 @@
+import logger from "../utils/logger";
 import Session from "../builder/session";
 import Message from "../gateway/message";
 import {ObjectLiteral} from "./definition";
@@ -47,7 +48,11 @@ export default class Emitter<State extends ObjectLiteral> {
 		if (actions instanceof Error) return actions;
 
 		for (const k in actions) {
-			actions[k](params);
+			try {
+				actions[k](params);
+			} catch (error) {
+				logger.log("error", `Error on sending event '${event}': '${(error as Error).message}'`)
+			}
 		}
 		return null;
 	}}

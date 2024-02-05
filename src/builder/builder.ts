@@ -207,6 +207,8 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 			this.emitter.execute(EmitterEvents.ON_SEND_MESSAGE, {session, message});
 		}
 
+		session.conversation_actions = [];
+
 		const sync = await vow.handle(this.session_manager.sync(stamp));
 		if (sync instanceof Error) throw new Error(`Can't sync session: '${session.message}'`);
 
