@@ -1,4 +1,4 @@
-const {Message, MessageTypes} = require("converflow");
+const {Message, MessageTypes} = require("convoflow");
 const express = require("express");
 
 module.exports = class Gateway {

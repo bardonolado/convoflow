@@ -1,4 +1,4 @@
-const {Bot} = require("converflow");
+const {Bot} = require("convoflow");
 const setup_flow = require("./flow.js");
 const Gateway = require("./gateway.js");
 
