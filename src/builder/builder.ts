@@ -65,7 +65,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		if (this.log_level) logger.enable(this.log_level);
 	}
 
-	public async start() {
+	public start() {
 		if (this.status) return false;
 		this.status = true;
 
@@ -86,9 +86,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		if (!this.status) return false;
 		this.status = false;
 
-		await vow.handle(this.worker.stop());
-
-		return true;
+		return this.worker.stop();
 	}
 
 	public signature() {

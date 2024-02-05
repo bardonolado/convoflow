@@ -22,13 +22,13 @@ export default class Worker {
 		this.status = false;
 	}
 
-	public async start() {
+	public start() {
 		if (this.status) throw new Error("Worker already started");
 		setImmediate(() => this.run());
 		return this.status = true;
 	}
 
-	public async stop() {
+	public stop() {
 		if (!this.status) throw new Error("Worker not started yet");
 		return this.status = false;
 	}
