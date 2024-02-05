@@ -11,6 +11,7 @@ import Course from "../flow/course";
 import Worker from "./worker";
 import Emitter, {EmitterEvents, ActionFunction} from "./emitter";
 import SessionManager, {Storage as SessionManagerStorage} from "./session-manager";
+import {ObjectLiteral} from "./definition";
 
 export {EmitterEvents as Events};
 export {Message};
@@ -22,7 +23,7 @@ interface Settings<State> {
     name?: string
 	state: State
 	log_level?: LogLevel
-	session_storage?: SessionManagerStorage
+	session_storage?: SessionManagerStorage<State>
 	onSendMessage?: (message: Message) => Promise<void> | void
 }
 
@@ -35,9 +36,9 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 	private log_level?: LogLevel;
 	private onSendMessage?: (message: Message) => void;
 	
-	private flow: Flow;
-	private session_manager: SessionManager;
-	private emitter: Emitter;
+	private flow: Flow<State>;
+	private session_manager: SessionManager<State>;
+	private emitter: Emitter<State>;
 	private gateway: Gateway;
 	private worker: Worker;
 	private status: boolean;
@@ -49,7 +50,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		this.log_level = settings?.log_level;
 		this.onSendMessage = settings?.onSendMessage;
 
-		this.flow = new Flow();
+		this.flow = new Flow<State>();
 		this.emitter = new Emitter();
 		this.gateway = new Gateway({onPushOutgoing: this.onSendMessage});
 		this.session_manager = new SessionManager(
@@ -94,22 +95,22 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		return this.signature;
 	}
 
-	public incoming(name: string, chain: Chain) {
+	public incoming(name: string, chain: Chain<State>) {
 		if (this.status) throw new Error("Can't insert node after startup");
 		return this.flow.insertNode(name, chain, FlowTypes.INCOMING);
 	}
 
-	public trailing(name: string, chain: Chain) {
+	public trailing(name: string, chain: Chain<State>) {
 		if (this.status) throw new Error("Can't insert node after startup");
 		return this.flow.insertNode(name, chain, FlowTypes.TRAILING);
 	}
 
-	public outgoing(name: string, chain: Chain) {
+	public outgoing(name: string, chain: Chain<State>) {
 		if (this.status) throw new Error("Can't insert node after startup");
 		return this.flow.insertNode(name, chain, FlowTypes.OUTGOING);
 	}
 
-	public event(event: EmitterEvents, action: ActionFunction) {
+	public event(event: EmitterEvents, action: ActionFunction<State>) {
 		if (this.status) throw new Error("Can't insert event after startup");
 		return this.emitter.set(event, action);
 	}
@@ -186,7 +187,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		session.setActive(true);
 		this.emitter.execute(EmitterEvents.ON_LOCK_SESSION, {session});
 
-		const course = new Course(this.flow, session);
+		const course = new Course<State>(this.flow, session);
 		await course.run();
 
 		// resolve conversation actions for session

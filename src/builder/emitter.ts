@@ -1,5 +1,6 @@
 import Session from "../builder/session";
 import Message from "../gateway/message";
+import {ObjectLiteral} from "./definition";
 
 export enum EmitterEvents {
     ON_CREATE_SESSION = "on-create-session",
@@ -12,21 +13,21 @@ export enum EmitterEvents {
     ON_SEND_MESSAGE = "on-send-message"
 }
 
-export interface ActionParams {
-    session?: Session<ObjectLiteral>
+export interface ActionParams<State extends ObjectLiteral> {
+    session?: Session<State>
     message?: Message
 }
 
-export type ActionFunction = (params: ActionParams) => void;
+export type ActionFunction<State extends ObjectLiteral> = (params: ActionParams<State>) => void;
 
-export default class Emitter {
-	private events: Map<EmitterEvents, ActionFunction[]>;
+export default class Emitter<State extends ObjectLiteral> {
+	private events: Map<EmitterEvents, ActionFunction<State>[]>;
 
 	constructor() {
-		this.events = new Map<EmitterEvents, ActionFunction[]>();
+		this.events = new Map<EmitterEvents, ActionFunction<State>[]>();
 	}
 
-	public set(event: EmitterEvents, action: ActionFunction): (Error | null) {
+	public set(event: EmitterEvents, action: ActionFunction<State>): (Error | null) {
 		const item = this.events.get(event);
 
 		if (!item) this.events.set(event, [action]);
@@ -35,13 +36,13 @@ export default class Emitter {
 		return null;
 	}
 
-	public get(event: EmitterEvents): (ActionFunction[] | Error) {
+	public get(event: EmitterEvents): (ActionFunction<State>[] | Error) {
 		const item = this.events.get(event);
 		if (!item) return new Error("Can't get any event");
 		return item;
 	}
 
-	public execute(event: EmitterEvents, params: ActionParams): (Error | null) {
+	public execute(event: EmitterEvents, params: ActionParams<State>): (Error | null) {
 		const actions = this.get(event);
 		if (actions instanceof Error) return actions;
 

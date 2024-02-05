@@ -1,3 +1,5 @@
+import {ObjectLiteral} from "../builder/definition";
+
 const IS_PROXY = Symbol("IS_PROXY");
 
 export const toWatchable = <T extends ObjectLiteral>(target: T, events?: {onRequest?: () => void, onUpdate?: () => void}): T => {

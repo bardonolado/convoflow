@@ -1,30 +1,31 @@
 import Session, {StorageData} from "./session";
+import {ObjectLiteral} from "./definition";
 import Gateway from "../gateway/gateway";
 import Emitter from "./emitter";
 import vow from "../utils/vow";
 
-export interface Storage {
-    get: (token: string) => Promise<StorageData<ObjectLiteral> | undefined>;
-    set: (token: string, data?: StorageData<ObjectLiteral>) => Promise<void>;
+export interface Storage<State> {
+    get: (token: string) => Promise<StorageData<State> | undefined>;
+    set: (token: string, data?: StorageData<State>) => Promise<void>;
 }
 
-interface Settings {
+interface Settings<State> {
     builder_name: string,
-    state: ObjectLiteral,
-    storage?: Storage
+    state: State,
+    storage?: Storage<State>
 }
 
-class SessionManager {
-    public storage?: Storage;
+class SessionManager<State extends ObjectLiteral = ObjectLiteral> {
+    public storage?: Storage<State>;
 
     private builder_name: string;
-    private state: ObjectLiteral;
-    private emitter: Emitter;
+    private state: State;
+    private emitter: Emitter<State>;
 	private gateway: Gateway;
 
-    private sessions: Map<string, Session<ObjectLiteral>>;
+    private sessions: Map<string, Session<State>>;
 
-    constructor(settings: Settings, emitter: Emitter, gateway: Gateway) {
+    constructor(settings: Settings<State>, emitter: Emitter<State>, gateway: Gateway) {
         this.storage = settings.storage;
 
         this.builder_name = settings.builder_name;
@@ -32,7 +33,7 @@ class SessionManager {
         this.emitter = emitter;
         this.gateway = gateway;
 
-        this.sessions = new Map<string, Session<ObjectLiteral>>();
+        this.sessions = new Map<string, Session<State>>();
     }
 
     public async get(token: string) {
@@ -44,7 +45,7 @@ class SessionManager {
         if (!result) return;
 
         if (!session) {
-            session = new Session({token, origin: this.builder_name, state: result.state});
+            session = new Session<State>({token, origin: this.builder_name, state: result.state});
             this.sessions.set(token, session);
         } else {
             session.setState(result.state);
@@ -57,7 +58,7 @@ class SessionManager {
     }
 
     public async create(token: string) {
-        const session = new Session({token, origin: this.builder_name, state: this.state});
+        const session = new Session<State>({token, origin: this.builder_name, state: this.state});
         this.sessions.set(token, session);
 
         if (this.storage) {

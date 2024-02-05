@@ -3,6 +3,8 @@ import lodash from "lodash";
 import Message, {createEmptyMessage} from "../gateway/message";
 import {toWatchable} from "../utils/proxy";
 
+import {ObjectLiteral} from "./definition";
+
 export interface SessionProperties<State> {
 	token: string
 	origin: string,
@@ -26,7 +28,7 @@ export interface StorageData<State> {
 	expiration: number
 }
 
-export default class Session<State extends ObjectLiteral> {
+export default class Session<State extends ObjectLiteral = ObjectLiteral> {
 	private static readonly EXPIRATION = 16 * 60 * 60;
 
 	public state: State;

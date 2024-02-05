@@ -1,4 +1,5 @@
 import Session from "../builder/session";
+import {ObjectLiteral} from "../builder/definition";
 import {isStepFunction, Progress} from "./definition";
 import Flow, {FlowTypes} from "./flow";
 import Node from "./node";
@@ -10,20 +11,20 @@ export enum CourseState {
     OVERLOAD = "overload"
 }
 
-export default class Course {
+export default class Course<State extends ObjectLiteral = ObjectLiteral> {
 	private static readonly MAX_STACK = 250;
 
-	private flow: Flow;
-	private session: Session<ObjectLiteral>;
-	private current_node: Node;
+	private flow: Flow<State>;
+	private session: Session<State>;
+	private current_node: Node<State>;
 	private current_step: number;
-	private detached_progress: Progress[];
+	private detached_progress: Progress<State>[];
 	private lifes: number;
 	private lock: boolean;
 	private current_flow_type: FlowTypes;
 	private state: CourseState;
 
-	constructor(flow: Flow, session: Session<ObjectLiteral>) {
+	constructor(flow: Flow<State>, session: Session<State>) {
 		this.flow = flow;
 		this.session = session;
 
@@ -35,7 +36,7 @@ export default class Course {
 		const node = this.flow.getNode(progress.current.node);
 		if (node instanceof Error) throw new Error(`Can't get flow node '${progress.current.node}'`);
 
-		const detached_progress: Progress[] = [];
+		const detached_progress: Progress<State>[] = [];
 		for (const k in progress.detached) {
 			const item = progress.detached[k];
 
