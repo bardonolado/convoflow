@@ -1,6 +1,6 @@
 {
     "name": "convoflow",
-    "version": "1.7.1",
+    "version": "1.7.2",
     "description": "chatbot builder framework",
     "main": "./dist/main.js",
     "types": "./dist/main.d.ts",
