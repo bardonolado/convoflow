@@ -524,8 +524,8 @@ We have some examples in this repository too:
 
 ## Considerations
 
-I really worked on this project, tried to solve this problem for me. Found myself writing with more quality while using **Converflow**. It really changed the way I developed/structured my chatbots. I hope that it will help you too.
+I really worked on this project, tried to solve this problem for me. Found myself writing with more quality while using **ConvoFlow**. It really changed the way I developed/structured my chatbots. I hope that it will help you too.
 
-Converflow is under [GNU GPLv3](/LICENSE) license.
+ConvoFlow is under [GNU GPLv3](/LICENSE) license.
 
 Author: Arnaldo Badin
