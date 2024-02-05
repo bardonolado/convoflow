@@ -14,16 +14,17 @@ const main = async function () {
 
     convoflow.event(Events.ON_RECEIVE_MESSAGE,
         (params) => {
-            console.log(`Incoming message ${params.message?.data}.`);
+            console.log(`Incoming message >>> ${params.message?.data}`);
         }
     );
 
     convoflow.event(Events.ON_SEND_MESSAGE,
         (params) => {
-            console.log(`Outgoing message ${params.message?.data}.`);
+            console.log(`Outgoing message <<< ${params.message?.data}`);
         }
     );
 
+    // INCOMING - always runs before any interaction
     convoflow.incoming("intentions",
         [
             (session, course) => {
@@ -33,27 +34,32 @@ const main = async function () {
                 let intent: string | undefined;
 
                 if (data == "good") intent = "something-good";
-                else if (data == "bad") intent = "something-bad";
+                else if (data == "not good") intent = "something-not-good";
                 else if (data == "idiot") intent = "something-rude";
+                else if (data == "help") intent = "asking-help";
 
                 if (intent == "something-rude") {
-                    session.send("Sorry, you are being rude. We can't take any more.");
-                    // session end just thrown session away
+                    session.send("Sorry, you are being rude. I do not tolerate that!");
+                    return session.end();
+                }
+                if (intent == "asking-help") {
+                    session.send("Well, I could help you but I forgot my tools at home!");
                     return session.end();
                 }
 
                 session.state.intent = intent;
-                return course.next();
+                course.next();
             }
         ]
     );
 
+    // TRAILING - normal dialogs (only first is attached, subsequent must be linked together)
     convoflow.trailing("root",
         [
             async (session, course) => {
                 const known = session.state.known;
 
-                let greeting = "Hello, I'm a Robot! How are you?";
+                let greeting = "Hello!! How are you?";
                 if (known) greeting = "Nice to see you again! How are you doing?";
 
                 session.state.known = true;
@@ -65,10 +71,14 @@ const main = async function () {
             (session, course) => {
                 const intent = session.state.intent;
 
-                let response = "Nice my friend! Keep going.";
-                if (intent == "something-bad") response = "So rude!";
+                if (intent === "something-good") {
+                    session.send("Nice my friend! Keep going.");
+                } else if (intent === "something-not-good") {
+                    session.send("Oh not cool... Not the end of the world tho!");
+                } else {
+                    session.send("Hmmmmmm....");
+                }
 
-                session.send(response);
                 // replace the trailing node to another, in this case the course state will be set to the "bye" trailing.
                 course.replace("bye");
             }
@@ -90,6 +100,10 @@ const main = async function () {
     // ! - THIS IS AN EXAMPLE OF PUSHING MESSAGES
     convoflow.push(new Message({contact: "my-contact", origin: "facebook", session: "unmanaged-same-session", data: "hello"}));
     convoflow.push(new Message({contact: "my-contact", origin: "facebook", session: "unmanaged-same-session", data: "good"}));
+    // convoflow.push(new Message({contact: "my-contact", origin: "facebook", session: "unmanaged-same-session", data: "idiot"}));
+    // convoflow.push(new Message({contact: "my-contact", origin: "facebook", session: "unmanaged-same-session", data: "not-good"}));
+    // convoflow.push(new Message({contact: "my-contact", origin: "facebook", session: "unmanaged-same-session", data: "nothing"}));
+    // convoflow.push(new Message({contact: "my-contact", origin: "facebook", session: "unmanaged-same-session", data: "help"}));
     convoflow.push(new Message({contact: "my-contact", origin: "facebook", session: "unmanaged-same-session", data: "hello again"}));
 }
 

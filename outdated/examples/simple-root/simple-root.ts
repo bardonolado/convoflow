@@ -5,13 +5,13 @@ const main = async function() {
 
 	bot.event(Events.ON_RECEIVE_MESSAGE,
 		(params) => {
-			console.log(`Incoming message ${params.message?.data}.`);
+			console.log(`Incoming message >>> ${params.message?.data}`);
 		}
 	);
 
 	bot.event(Events.ON_SEND_MESSAGE,
 		(params) => {
-			console.log(`Outgoing message ${params.message?.data}.`);
+			console.log(`Outgoing message <<< ${params.message?.data}`);
 		}
 	);
 
