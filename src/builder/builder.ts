@@ -23,6 +23,7 @@ interface Settings<State> {
     name?: string
 	state: State
 	log_level?: LogLevel
+	dismiss_when_busy?: boolean
 	session_storage?: SessionManagerStorage<State>
 	onSendMessage?: (message: Message) => Promise<void> | void
 }
@@ -34,6 +35,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 	private name: string;
 	private state: State;
 	private log_level?: LogLevel;
+	private dismiss_when_busy?: boolean;
 	private onSendMessage?: (message: Message) => void;
 	
 	private flow: Flow<State>;
@@ -48,6 +50,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		this.name = settings?.name || `builder-#${this.id}`;
 		this.state = settings.state || {};
 		this.log_level = settings?.log_level;
+		this.dismiss_when_busy = settings?.dismiss_when_busy;
 		this.onSendMessage = settings?.onSendMessage;
 
 		this.flow = new Flow<State>();
@@ -145,7 +148,8 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		if (session instanceof Error) throw new Error(`Can't get session: '${session.message}'`);
 
 		if (session?.isActive()) {
-			this.gateway.pushIncoming(message, {beggining: true});
+			// dismiss message when bot is busy
+			if (!this.dismiss_when_busy) this.gateway.pushIncoming(message, {beggining: true});
 			throw new Error("Session already active");
 		}
 
