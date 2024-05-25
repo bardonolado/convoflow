@@ -29,7 +29,7 @@ export interface StorageData<State> {
 }
 
 export default class Session<State extends ObjectLiteral = ObjectLiteral> {
-	private static readonly EXPIRATION = 16 * 60 * 60;
+	private static readonly EXPIRATION = 16 * 60 * 60 * 1000; // milliseconds
 
 	public state: State;
 	public need_sync: boolean;
@@ -66,7 +66,7 @@ export default class Session<State extends ObjectLiteral = ObjectLiteral> {
 
 		this.progress = {current: {node: "", step: 0}, detached: []};
 
-		this.timestamp = Math.floor(+new Date() / 1000);
+		this.timestamp = +new Date();
 
 		this.conversation_actions = [];
 	}
@@ -95,12 +95,16 @@ export default class Session<State extends ObjectLiteral = ObjectLiteral> {
 		return this.vendor;
 	}
 
+	public getTimestamp() {
+		return this.timestamp;
+	}
+
 	public getStorageData(): StorageData<State> {
 		return {progress: this.progress, state: this.state, timestamp: this.timestamp, expiration: Session.EXPIRATION};
 	}
 
 	public isExpired() {
-		return (Math.floor(+new Date() / 1000) > (this.timestamp + Session.EXPIRATION));
+		return +new Date() > (this.timestamp + Session.EXPIRATION);
 	}
 
 	public setActive(value: boolean) {
@@ -155,7 +159,7 @@ export default class Session<State extends ObjectLiteral = ObjectLiteral> {
 	}
 
 	public refresh() {
-		return this.timestamp = Math.floor(+new Date() / 1000);
+		return this.timestamp = +new Date();
 	}
 
 	public send(data: any) {

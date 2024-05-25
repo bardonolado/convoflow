@@ -23,7 +23,8 @@ interface Settings<State> {
     name?: string
 	state: State
 	log_level?: LogLevel
-	dismiss_when_busy?: boolean
+	dismiss_messages_when_busy?: boolean
+	new_messages_ignore_window?: number // milliseconds
 	session_storage?: SessionManagerStorage<State>
 	onSendMessage?: (message: Message) => Promise<void> | void
 }
@@ -35,7 +36,8 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 	private name: string;
 	private state: State;
 	private log_level?: LogLevel;
-	private dismiss_when_busy?: boolean;
+	private dismiss_messages_when_busy?: boolean;
+	private new_messages_ignore_window?: number;
 	private onSendMessage?: (message: Message) => void;
 	
 	private flow: Flow<State>;
@@ -50,7 +52,8 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 		this.name = settings?.name || `builder-#${this.id}`;
 		this.state = settings.state || {};
 		this.log_level = settings?.log_level;
-		this.dismiss_when_busy = settings?.dismiss_when_busy;
+		this.dismiss_messages_when_busy = settings?.dismiss_messages_when_busy;
+		this.new_messages_ignore_window = settings?.new_messages_ignore_window;
 		this.onSendMessage = settings?.onSendMessage;
 
 		this.flow = new Flow<State>();
@@ -149,7 +152,7 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 
 		if (session?.isActive()) {
 			// dismiss message when bot is busy
-			if (!this.dismiss_when_busy) this.gateway.pushIncoming(message, {beggining: true});
+			if (!this.dismiss_messages_when_busy) this.gateway.pushIncoming(message, {beggining: true});
 			throw new Error("Session already active");
 		}
 
@@ -175,6 +178,13 @@ export class Builder<State extends ObjectLiteral = ObjectLiteral> {
 			if (!node) throw new Error("Can't get flow node");
 
 			session.setProgress({current: {node: node.name, step: 0}, detached: []});
+		} else {
+			if (this.new_messages_ignore_window) {
+				const session_timestamp = session.getTimestamp();
+				if (session_timestamp > (+new Date() - this.new_messages_ignore_window)) {
+					throw new Error("Ignoring message because is inside ignore window");
+				}
+			}
 		}
 
 		session.setContact(message.contact);
